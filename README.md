@@ -11,7 +11,7 @@
 
 ## 🎯 Classmates Prepping for Exams
 
-Interactive study guides + practice exams with **live Stata code examples** you can interpret and run. Everything works directly in your browser.
+Interactive study guides + practice exams with **live Stata code examples** you can interpret. Everything works directly in your browser.
 
 ## 📚 Available Resources
 
@@ -21,18 +21,18 @@ Interactive study guides + practice exams with **live Stata code examples** you 
 
 > **🔥 Click any link → opens interactive page with Stata examples + explanations**
 
-## 🚀 How to Use
+##  How to Use
 
-1. **Click any link above** → opens full interactive module in new tab
+1. **Click any link above** → opens full interactive module
 2. **No software needed** → runs in any browser (Chrome/Firefox/Safari)
 3. **Practice at your pace** → work through examples, interpret Stata output
 4. **Works offline** → download ZIP or individual files for studying without internet
+5. **Tracks your progress** → tracks your progress even if you close your browser or tab
 
-## 💻 Features
+##  Features
 
 - ✅ **Live Stata code** you can read + interpret
-- ✅ **Interactive exercises** with instant feedback  
-- ✅ **Exam-style questions** matching Dr. B's format
+- ✅ **Interactive exercises** with instant feedback
 - ✅ **Mobile-friendly** → study on phone/tablet
 - ✅ **No login required** → instant access
 
