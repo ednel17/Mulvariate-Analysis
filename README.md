@@ -1,4 +1,4 @@
-# 📊 Multivariate Analysis Study Resources  
+#  Multivariate Analysis Study Resources  
 **Dr. B's Multivariate Study Course** • Interactive Guides & Practice Exams
 
 <div align="center">
@@ -9,17 +9,17 @@
 
 </div>
 
-## 🎯 Classmates Prepping for Exams
+##  Classmates Prepping for Exams
 
 Interactive study guides + practice exams with **live Stata code examples** you can interpret. Everything works directly in your browser.
 
-## 📚 Available Resources (Overviews)
+##  Available Resources (Overviews)
 
 | **Chapter** | **Study Guide** | **Practice Exam** |
 |-------------|-----------------|-------------------|
 | **Ch 6** Multiple Regression | [📖 Ch 6 Guide](regression-learning-lab.html) | [📝 Ch 6 Exam] |
 
-> **🔥 Click any link → opens interactive page with Stata examples + explanations**
+> ** Click any link → opens interactive page with Stata examples + explanations**
 
 ##  How to Use
 
@@ -32,12 +32,12 @@ Interactive study guides + practice exams with **live Stata code examples** you 
 
 ##  Features
 
-- ✅ **Live Stata code** you can read + interpret
-- ✅ **Interactive exercises** with instant feedback
-- ✅ **Mobile-friendly** → study on phone/tablet
-- ✅ **No login required** → instant access
+-  **Live Stata code** you can read + interpret
+-  **Interactive exercises** with instant feedback
+-  **Mobile-friendly** → study on phone/tablet
+-  **No login required** → instant access
 
-## 📝 Coming Soon
+##  Coming Soon
 - Ch 8+ modules  
 
 ---
