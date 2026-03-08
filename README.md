@@ -6,7 +6,7 @@ Collection of interactive study guides, practice tests, and learning modules for
 
 Click any link below to open the resource:
 
-- **[Chapter 6 - Multiple Regression - Review](/Bivariate (Simple) Regression.html)**  
+- **[Chapter 6 - Multiple Regression - Review](/[Bivariate (Simple) Regression.html](https://github.com/ednel17/Mulvariate-Analysis/blob/main/Bivariate%20(Simple)%20Regression.html))**  
 
 *(Add your actual HTML filenames here by copying this format: `**[Title](filename.html)**`)*
 
