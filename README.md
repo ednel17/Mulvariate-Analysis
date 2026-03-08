@@ -1,26 +1,47 @@
-# Multivariate Analysis Study Resources
+# 📊 Multivariate Analysis Study Resources  
+**Dr. B's Multivariate Study Course** • Interactive Guides & Practice Exams
 
-Collection of interactive study guides, practice tests, and learning modules for multivariate analysis. All materials are self-contained HTML files that render directly in your browser.
+<div align="center">
 
-## What's inside
+[![Interactive](https://img.shields.io/badge/%F0%9F%94%A7-Interactive-brightgreen)](https://ednel17.github.io/Multivariate-Analysis)
+[![No Install](https://img.shields.io/badge/%F0%9F%92%A1-No%20Install-blue)](https://ednel17.github.io/Multivariate-Analysis)
+[![Free](https://img.shields.io/badge/%F0%9F%92%B0-Free-009688)](https://ednel17.github.io/Multivariate-Analysis)
 
-Click any link below to open the resource:
+</div>
 
-- **[Chapter 6 - Multiple Regression - Review](bivariate-simple-regression.html)**  
+## 🎯 Classmates Prepping for Exams
 
-*(Add your actual HTML filenames here by copying this format: `**[Title](filename.html)**`)*
+Interactive study guides + practice exams with **live Stata code examples** you can interpret and run. Everything works directly in your browser.
 
-## How to use
+## 📚 Available Resources
 
-1. **Click any link above** - each opens in a new browser tab/window as an interactive page
-2. **No software needed** - everything runs in the browser
-3. **Works offline** - you can download individual pages or the whole repo as ZIP
+| **Chapter** | **Study Guide** | **Practice Exam** |
+|-------------|-----------------|-------------------|
+| **Ch 5** Bivariate Regression | [📖 Ch 5 Guide](bivariate-regression-guide.html) | [📝 Ch 5 Exam](bivariate-regression-exam.html) |
 
-## About
+> **🔥 Click any link → opens interactive page with Stata examples + explanations**
 
-These materials were created using Claude AI and hosted via GitHub Pages for easy sharing with classmates. No Stata `.do` files or data are included - this is purely for review and practice.
+## 🚀 How to Use
 
-***
+1. **Click any link above** → opens full interactive module in new tab
+2. **No software needed** → runs in any browser (Chrome/Firefox/Safari)
+3. **Practice at your pace** → work through examples, interpret Stata output
+4. **Works offline** → download ZIP or individual files for studying without internet
 
-*Last updated: March 2026*  
-*For SYA 6933 or similar multivariate analysis course*
+## 💻 Features
+
+- ✅ **Live Stata code** you can read + interpret
+- ✅ **Interactive exercises** with instant feedback  
+- ✅ **Exam-style questions** matching Dr. B's format
+- ✅ **Mobile-friendly** → study on phone/tablet
+- ✅ **No login required** → instant access
+
+## 📝 Coming Soon
+- Ch 8+ modules  
+- Full course exam prep
+- Professor feedback integration
+
+---
+
+*Created with Claude AI • Hosted on GitHub Pages*  
+*Last updated: March 2026 • ednel17.github.io/Multivariate-Analysis*
