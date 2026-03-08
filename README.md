@@ -13,11 +13,11 @@
 
 Interactive study guides + practice exams with **live Stata code examples** you can interpret. Everything works directly in your browser.
 
-## 📚 Available Resources
+## 📚 Available Resources (Overviews)
 
 | **Chapter** | **Study Guide** | **Practice Exam** |
 |-------------|-----------------|-------------------|
-| **Ch 5** Bivariate Regression | [📖 Ch 5 Guide](bivariate-regression-guide.html) | [📝 Ch 5 Exam](bivariate-regression-exam.html) |
+| **Ch 6** Multiple Regression | [📖 Ch 6 Guide](regression-learning-lab.html) | [📝 Ch 6 Exam] |
 
 > **🔥 Click any link → opens interactive page with Stata examples + explanations**
 
@@ -28,6 +28,7 @@ Interactive study guides + practice exams with **live Stata code examples** you 
 3. **Practice at your pace** → work through examples, interpret Stata output
 4. **Works offline** → download ZIP or individual files for studying without internet
 5. **Tracks your progress** → tracks your progress even if you close your browser or tab
+6. **This does not replace your personal study time. It's only meant to add to what you already are doing.**
 
 ##  Features
 
