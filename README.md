@@ -17,7 +17,7 @@ Interactive study guides + practice exams with **live Stata code examples** you 
 
 | **Chapter** | **Study Guide** | **Practice Exam** |
 |-------------|-----------------|-------------------|
-| **Ch 6** Multiple Regression | [📖 Ch 6 Guide](regression-learning-lab.html) | [📝 Ch 6 Exam] |
+| **Ch 6** Multiple Regression | [📖 Ch 6 Guide](mult-regression-learning-lab.html) | [📝 Ch 6 Exam] |
 
 > ** Click any link → opens interactive page with Stata examples + explanations**
 
