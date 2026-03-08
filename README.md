@@ -6,12 +6,7 @@ Collection of interactive study guides, practice tests, and learning modules for
 
 Click any link below to open the resource:
 
-- **[Study Guide 1 - Core Concepts](study-guide-1.html)**  
-- **[Practice Test 1 - Regression Basics](practice-test-1.html)**  
-- **[Module 1 - Model Diagnostics](module-1.html)**  
-- **[Study Guide 2 - Multivariate Methods](study-guide-2.html)**  
-- **[Practice Test 2 - Advanced Models](practice-test-2.html)**  
-- **[Module 2 - Dimensionality Reduction](module-2.html)**  
+- **[Chapter 6 - Multiple Regression - Review](/Bivariate (Simple) Regression.html)**  
 
 *(Add your actual HTML filenames here by copying this format: `**[Title](filename.html)**`)*
 
