@@ -38,8 +38,6 @@ Interactive study guides + practice exams with **live Stata code examples** you 
 
 ## 📝 Coming Soon
 - Ch 8+ modules  
-- Full course exam prep
-- Professor feedback integration
 
 ---
 
