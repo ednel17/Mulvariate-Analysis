@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multivariate Regression Chapter Exam</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0c0e14;--surface:#14171f;--surface2:#1a1e28;--surface3:#222737;--border:#2c3148;--text:#dfe1e8;--dim:#7d8299;--bright:#fff;--accent:#7ba4f7;--accent2:#56c7b9;--accent3:#f76e8a;--success:#56c7b9;--warn:#f5c842;--error:#f76e8a;--code:#111420;--r:10px;--rs:7px;--font:'DM Sans',system-ui,sans-serif;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono','Consolas',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.app{max-width:860px;margin:0 auto;padding:20px 24px 100px}
+/* HEADER */
+.exam-header{text-align:center;padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.exam-header h1{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--bright)}
+.exam-header p{font-size:13px;color:var(--dim);margin-top:4px}
+.exam-meta{display:flex;justify-content:center;gap:24px;margin-top:16px;flex-wrap:wrap}
+.meta-pill{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);color:var(--dim);background:var(--surface)}
+.meta-pill b{color:var(--accent)}
+/* PROGRESS BAR */
+.progress-strip{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 0;margin:0 -24px;padding-left:24px;padding-right:24px}
+.progress-row{display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s}
+.progress-text{font-size:12px;color:var(--dim);font-weight:600;white-space:nowrap;min-width:80px;text-align:right}
+.score-text{font-size:12px;color:var(--accent2);font-weight:600;white-space:nowrap}
+/* NAV */
+.q-nav{display:flex;gap:4px;flex-wrap:wrap;margin:16px 0 8px;padding:12px 0;border-bottom:1px solid var(--border)}
+.q-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--dim);transition:all .2s}
+.q-dot:hover{border-color:var(--accent);color:var(--text)}
+.q-dot.active{border-color:var(--accent);background:var(--accent);color:#0c0e14}
+.q-dot.correct{border-color:var(--success);background:rgba(86,199,185,.15);color:var(--success)}
+.q-dot.wrong{border-color:var(--error);background:rgba(247,110,138,.12);color:var(--error)}
+.q-dot.answered{border-color:var(--dim);background:var(--surface2);color:var(--dim)}
+/* QUESTION CARD */
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;margin:16px 0;display:none}
+.q-card.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.q-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:3px 10px;border-radius:12px;border:1px solid var(--border); color:var(--accent); background:rgba(123,164,247,.1)}
+.q-counter{font-size:12px;color:var(--dim)}
+.q-text{font-size:16px;line-height:1.7;margin-bottom:20px}
+.q-text strong{color:var(--bright)}
+/* OPTIONS */
+.opt-btn{display:block;width:100%;text-align:left;padding:13px 18px;margin:7px 0;border-radius:var(--rs);background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-size:14px;cursor:pointer;transition:all .15s;font-family:var(--font);line-height:1.6}
+.opt-btn:hover:not(.locked){border-color:var(--accent);background:var(--surface3)}
+.opt-btn.sel{border-color:var(--accent);background:rgba(123,164,247,.08)}
+.opt-btn.correct-show{border-color:var(--success);background:rgba(86,199,185,.1);color:var(--success)}
+.opt-btn.wrong-show{border-color:var(--error);background:rgba(247,110,138,.08);color:var(--error);opacity:.6}
+.opt-btn.locked{pointer-events:none}
+.opt-btn .opt-letter{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--surface3);text-align:center;line-height:24px;font-size:11px;font-weight:700;margin-right:10px;color:var(--dim)}
+.opt-btn.correct-show .opt-letter{background:var(--success);color:#0c0e14}
+.opt-btn.wrong-show .opt-letter{background:var(--error);color:#fff}
+/* TEXT INPUT */
+.fill-input{width:100%;padding:12px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:15px;font-family:var(--font);outline:none;transition:border-color .2s}
+.fill-input:focus{border-color:var(--accent)}
+.fill-input.ok{border-color:var(--success);background:rgba(86,199,185,.05)}
+.fill-input.bad{border-color:var(--error);background:rgba(247,110,138,.05)}
+.fill-input:read-only{opacity:.8}
+textarea.fill-input{min-height:90px;resize:vertical;line-height:1.6}
+/* MATCHING */
+.match-zone{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.match-item{padding:10px 14px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);font-size:13px;cursor:pointer;transition:all .15s;line-height:1.5}
+.match-item:hover{border-color:var(--accent)}
+.match-item.m-selected{border-color:var(--accent);background:rgba(123,164,247,.1);color:var(--accent)}
+.match-item.m-matched{border-color:var(--success);background:rgba(86,199,185,.08);color:var(--success);pointer-events:none}
+.match-item.m-wrong{border-color:var(--error);background:rgba(247,110,138,.08)}
+.match-left{border-left:3px solid var(--accent)}
+.match-right{border-left:3px solid var(--accent3)}
+.match-right.m-matched{border-left-color:var(--success)}
+/* FEEDBACK */
+.fb-box{padding:16px 20px;border-radius:var(--rs);margin-top:16px;font-size:14px;line-height:1.65;display:none}
+.fb-box.show{display:block;animation:fadeUp .25s ease}
+.fb-ok{background:rgba(86,199,185,.07);border:1px solid rgba(86,199,185,.25);color:var(--success)}
+.fb-no{background:rgba(247,110,138,.07);border:1px solid rgba(247,110,138,.25);color:#ffa0a0}
+.fb-box b{display:block;margin-bottom:4px}
+.fb-sample{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);color:var(--warn)}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:var(--font)}
+.btn-primary{background:var(--accent);color:#0c0e14}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-check{background:var(--accent);color:#0c0e14;margin-top:10px}
+.btn-check:hover{filter:brightness(1.1)}
+.q-actions{display:flex;justify-content:space-between;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+/* RESULTS SCREEN */
+.results-screen{display:none;text-align:center;padding:40px 0}
+.results-screen.show{display:block;animation:fadeUp .5s ease}
+.results-score{font-family:var(--serif);font-size:64px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:16px 0 8px}
+.results-pct{font-size:20px;color:var(--dim);margin-bottom:32px}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;text-align:left;margin:24px 0}
+.results-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px}
+.results-card .rc-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.results-card .rc-val{font-size:22px;font-weight:700;margin-top:4px}
+.results-card .rc-val.good{color:var(--success)}
+.results-card .rc-val.mid{color:var(--warn)}
+.results-card .rc-val.low{color:var(--error)}
+.struggle-list{text-align:left;margin:24px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.struggle-list h3{font-size:14px;color:var(--accent3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.struggle-item{font-size:14px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--text)}
+.struggle-item:last-child{border:none}
+/* RESET */
+.reset-area{text-align:center;margin-top:24px}
+.reset-btn{padding:8px 20px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--rs);color:var(--dim);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .2s}
+.reset-btn:hover{border-color:var(--error);color:var(--error)}
+/* DATA TABLE */
+.dt{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.dt th{text-align:left;padding:8px 10px;background:var(--surface3);color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:11px;border-bottom:1px solid var(--border)}
+.dt td{padding:8px 10px;border-bottom:1px solid var(--border)}
+@media(max-width:640px){.app{padding:12px 14px 80px}.q-card{padding:20px}.exam-header h1{font-size:22px}.match-zone{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STORAGE & STATE
+// ═══════════════════════════════════════
+const SK = 'ch6_exam_v1';
+let state = {cur:0, answers:{}, scores:{}, done:false};
+
+function save(){try{localStorage.setItem(SK,JSON.stringify(state))}catch(e){}}
+function load(){try{let s=localStorage.getItem(SK);if(s){state=JSON.parse(s);return true}}catch(e){}return false}
+function reset(){
+  let b = document.querySelector('.reset-btn');
+  if(!b)return;
+  if(!b.dataset.armed){
+    b.dataset.armed='1'; b.textContent='⚠ Click again to confirm'; b.style.borderColor='var(--error)'; b.style.color='var(--error)';
+    setTimeout(()=>{if(b){delete b.dataset.armed; b.textContent='↻ Reset Exam'; b.style.borderColor=''; b.style.color=''}},3000);
+    return;
+  }
+  localStorage.removeItem(SK);
+  state = {cur:0, answers:{}, scores:{}, done:false};
+  render();
+}
+
+// ═══════════════════════════════════════
+// EXAM QUESTIONS (9 Categories, 4 Questions Each = 36 Total)
+// ═══════════════════════════════════════
+const Q = [
+  // --- 1. Multiple Choice ---
+  {id:0, type:'mc', cat:'Multiple Choice', text:'In a multiple regression model, how is the intercept interpreted?', opts:['The value of Y when the first predictor is zero', 'The unconditional mean of Y', 'The conditional mean of Y when all predictor variables equal zero', 'The change in Y when all predictors increase by one'], ans:2, ok:'The intercept is the conditional mean of Y when both (or all) predictor variables equal zero [cite: 42].', no:'The intercept is the conditional mean of Y when both (or all) predictor variables equal zero[cite: 42].'},
+  {id:1, type:'mc', cat:'Multiple Choice', text:'Which of the following is true regarding R-squared ($R^2$)?', opts:['It always decreases when you add predictor variables.', 'It is unaffected by the number of predictor variables.', 'It penalizes models for having too many predictor variables.', 'It always increases as we add additional predictor variables to our model.'], ans:3, ok:'R-squared is problematic in that it always increases as we add additional predictor variables to our model [cite: 894].', no:'R-squared always increases as we add additional predictor variables to our model[cite: 894].'},
+  {id:2, type:'mc', cat:'Multiple Choice', text:'Why might a researcher use a Bonferroni adjustment when conducting multiple hypothesis tests?', opts:['To increase the R-squared value.', 'To divide the overall Type I error rate by the number of tests, determining a more stringent alpha level for individual tests.', 'To calculate the Bayesian Information Criterion.', 'To increase the statistical power of the individual tests.'], ans:1, ok:'Under the Bonferroni adjustment, an overall Type I error probability is decided upon... and then this rate is divided by the number of tests to determine the alpha level for the individual tests [cite: 411].', no:'Under the Bonferroni adjustment, an overall Type I error probability is decided upon... and then this rate is divided by the number of tests to determine the alpha level for the individual tests[cite: 411].'},
+  {id:3, type:'mc', cat:'Multiple Choice', text:'Which of the following describes models that are "nested"?', opts:['Whenever one model can be produced by placing constraints on the coefficients of another model.', 'Models that have the same number of predictor variables.', 'Models estimated on different sample sizes.', 'Models that have different outcome variables.'], ans:0, ok:'Whenever one model can be produced by placing constraints on the coefficients of another model, we refer to the models as nested [cite: 481].', no:'Whenever one model can be produced by placing constraints on the coefficients of another model, we refer to the models as nested[cite: 481].'},
+
+  // --- 2. Fill in the Blank ---
+  {id:4, type:'fill', cat:'Fill in the Blank', text:'TSS = SSE + _______', answer:'MSS', checker:v=>v.trim().toUpperCase()==='MSS', ok:'TSS = SSE + MSS [cite: 444].', no:'TSS = SSE + MSS[cite: 444].'},
+  {id:5, type:'fill', cat:'Fill in the Blank', text:'If we decrease the alpha level for each individual test, we make it ________ to reject each individual null hypothesis, and reduce the chances of making a Type I error.', answer:'harder', checker:v=>v.trim().toLowerCase()==='harder', ok:'If we decreased the alpha level for each individual test, we would make it harder to reject each individual null hypothesis [cite: 408].', no:'If we decreased the alpha level for each individual test, we would make it harder to reject each individual null hypothesis[cite: 408].'},
+  {id:6, type:'fill', cat:'Fill in the Blank', text:'Whenever there is exactly ________ restriction(s) in the numerator, the calculated F-value equals the square of a t-value for the same null hypothesis.', answer:'1', checker:v=>v.trim()==='1'||v.trim().toLowerCase()==='one', ok:'Whenever there is just one restriction in the numerator... the calculated F-value equals the square of a t-value for the same null hypothesis [cite: 512].', no:'Whenever there is just one restriction in the numerator... the calculated F-value equals the square of a t-value for the same null hypothesis[cite: 512].'},
+  {id:7, type:'fill', cat:'Fill in the Blank', text:'The quantity $\\Sigma(Y_i - \\hat{Y}_i)^2$ which we minimize to obtain OLS estimates is abbreviated as ________.', answer:'SSE', checker:v=>v.trim().toUpperCase()==='SSE', ok:'We will now abbreviate this quantity as SSE (for Sum of Squared Errors) [cite: 441].', no:'We will now abbreviate this quantity as SSE (for Sum of Squared Errors)[cite: 441].'},
+
+  // --- 3. Short Written Response ---
+  {id:8, type:'written', cat:'Short Written Response', text:'What does it mean when two variables have "additive effects" in a multiple regression model?', sample:'It means that we add their two separate slopes when both change; the effect of one variable does not depend on the level of the other[cite: 256].'},
+  {id:9, type:'written', cat:'Short Written Response', text:'Explain the main difference between R-squared and Adjusted R-squared.', sample:'R-squared measures the proportion of total variation explained by the model, but it always increases when variables are added[cite: 874, 894]. Adjusted R-squared includes a penalty for the number of predictors, so it can decrease if a new variable does not offset the loss of a degree of freedom[cite: 899, 900].'},
+  {id:10, type:'written', cat:'Short Written Response', text:' Why is the $(1 - r_{12}^2)$ term in the denominator of the standard error formula for multiple regression important?', sample:'This term shows that the standard error of the slope depends on the Pearson correlation between the predictors. The larger the correlation between the two predictor variables, the larger the standard error[cite: 284, 285].'},
+  {id:11, type:'written', cat:'Short Written Response', text:'How can you tell from a regression table whether a coefficient is statistically significant at the 5% level if only t-ratios are provided?', sample:'You should expect to see that these t-ratios are larger than |1.96| (absolute value greater than 1.96) for large samples[cite: 979].'},
+
+  // --- 4. Matching Questions ---
+  {id:12, type:'match', cat:'Matching Questions', text:'Match each Sum of Squares term to its correct definition:', left:['Total Sum of Squares (TSS)', 'Sum of Squared Errors (SSE)', 'Model Sum of Squares (MSS)', 'R-Squared'], right:['Sum of the squared deviation of each observed value from the unconditional mean', 'Sum of squared differences between observed values and predicted values', 'Sum of squared differences between predicted values and the unconditional mean', 'Proportion of the total variation in Y that is explained by the model'], pairs:[[0,0],[1,1],[2,2],[3,3]]},
+  {id:13, type:'match', cat:'Matching Questions', text:'Match the degrees of freedom concepts to their representations:', left:['$n - k$', '$n - 1$', '$df_R - df_F$', '$k$'], right:['Denominator degrees of freedom for the full model', 'Total degrees of freedom associated with TSS', 'Numerator degrees of freedom for the F-test (number of restrictions)', 'Number of predictors plus 1 for the intercept'], pairs:[[0,0],[1,1],[2,2],[3,3]]},
+  {id:14, type:'match', cat:'Matching Questions', text:'Match the statistical test or term to its function:', left:['Model F-Test', 'Partial F-Test', 't-test', 'Bonferroni Adjustment'], right:['Compares the estimated model to an intercept-only model', 'Tests incremental effect of a predictor subset given other predictors are already in the model', 'Tests whether a single slope coefficient is equal to zero', 'Controls the overall Type I error rate across multiple individual tests'], pairs:[[0,0],[1,1],[2,2],[3,3]]},
+  {id:15, type:'match', cat:'Matching Questions', text:'Match the terminology to its application:', left:['AIC', 'Exploratory Research', 'Confirmatory Research', 'Semistandardized Coefficient'], right:['Penalizes complex models without relying on arbitrary alpha levels', 'Examining many predictors empirically without strong advance theory', 'Testing strong theoretical expectations specified in advance', 'Calculated by dividing the coefficient by the standard deviation of the outcome'], pairs:[[0,0],[1,1],[2,2],[3,3]]},
+
+  // --- 5. Term Identification ---
+  {id:16, type:'mc', cat:'Term Identification', text:'In the context of comparing models using Information Criteria (AIC and BIC), which model is preferred?', opts:['The model with the highest values.', 'The model with values closest to zero.', 'The model with values closest to 1.', 'The model with the lowest values.'], ans:3, ok:'For both AIC and BIC, models with smaller values are preferred [cite: 928].', no:'For both AIC and BIC, models with smaller values are preferred[cite: 928].'},
+  {id:17, type:'mc', cat:'Term Identification', text:'What is the "intercept-only model"?', opts:['A model with no slope coefficients constrained.', 'A reduced model obtained by constraining all slope coefficients to zero.', 'A full model with all possible interactions.', 'A model where the dependent variable is zero.'], ans:1, ok:'Model 1 is often referred to as the intercept-only model. Notice that it can be produced by any of the other models by constraining all of the slopes in each... to zero[cite: 478, 479].', no:'Model 1 is often referred to as the intercept-only model. Notice that it can be produced by any of the other models by constraining all of the slopes... to zero[cite: 478, 479].'},
+  {id:18, type:'fill', cat:'Term Identification', text:'The term $(1 - r_{12}^2)$ is found in the ________ of the standard error formula for multiple regression.', answer:'denominator', checker:v=>v.trim().toLowerCase()==='denominator', ok:'The new term in the denominator of Equation 6.2... shows that, in multiple regression, the standard error of the slope... depends on the Pearson correlation [cite: 284].', no:'The new term in the denominator of Equation 6.2... shows that, in multiple regression, the standard error of the slope... depends on the Pearson correlation[cite: 284].'},
+  {id:19, type:'mc', cat:'Term Identification', text:'What does the notation $MSS(X_2 | X_1)$ represent?', opts:['The standard error of X2 given X1.', 'The additional sum of squares explained when we add X2 to a model that already contains X1.', 'The total sum of squares for both X1 and X2.', 'The probability of making a Type I error.'], ans:1, ok:'This quantity is... the additional sum of squares explained when we add one or more variables to a model... denoted as MSS(X2|X1) [cite: 769, 771].', no:'This quantity is... the additional sum of squares explained when we add one or more variables to a model... denoted as MSS(X2|X1)[cite: 769, 771].'},
+
+  // --- 6. Equation Interpretation ---
+  {id:20, type:'fill', cat:'Equation Interpretation', text:' The unstandardized regression equation is given as $E(Y) = 10 + 2X_1 + 3X_2$. If $X_1 = 5$ and $X_2 = 2$, what is the conditional mean of Y?', answer:'26', checker:v=>v.trim()==='26', ok:'E(Y) = 10 + 2(5) + 3(2) = 10 + 10 + 6 = 26. This matches the point {5,2} corresponding to a conditional mean of 26 [cite: 253].', no:'E(Y) = 10 + 2(5) + 3(2) = 10 + 10 + 6 = 26. This matches the point {5,2} corresponding to a conditional mean of 26[cite: 253].'},
+  {id:21, type:'mc', cat:'Equation Interpretation', text:' In the F-test formula $F = \\frac{SSE(R) - SSE(F)}{df_R - df_F} \\div \\frac{SSE(F)}{df_F}$, what does the numerator degrees of freedom ($df_R - df_F$) represent?', opts:['The number of observations minus the number of predictors.', 'The number of predictors in the full model.', 'The number of restrictions placed on the full model by the null hypothesis.', 'The sample size.'], ans:2, ok:'The numerator degrees of freedom... will always equal the number of restrictions in the null hypothesis [cite: 508].', no:'The numerator degrees of freedom... will always equal the number of restrictions in the null hypothesis[cite: 508].'},
+  {id:22, type:'written', cat:'Equation Interpretation', text:'If a researcher calculates $i\\beta = 10,000 * 0.00102 = 10.20$ for an earnings variable, how do you interpret this calculation?', sample:'This calculation rescales the coefficient. It means the outcome is expected to change by 10.20 units for each additional $10,000 in earnings, holding other variables constant[cite: 328, 329].'},
+  {id:23, type:'mc', cat:'Equation Interpretation', text:'In the formula for Adjusted R-Squared ($R_a^2 = 1 - \\frac{SSE/(n-k)}{TSS/(n-1)}$), what does the formula mathematically penalize the model for?', opts:['Having too many predictor variables (loss of degrees of freedom).', 'Having too large of a sample size.', 'Having uncorrelated predictor variables.', 'Having an intercept term.'], ans:0, ok:'This formula recognizes that each variable added to the model reduces the degrees of freedom by 1 [cite: 899].', no:'This formula recognizes that each variable added to the model reduces the degrees of freedom by 1[cite: 899].'},
+
+  // --- 7. Regression Output Interpretation ---
+  {id:24, type:'written', cat:'Regression Output Interpretation', text:'Write a complete interpretation for a slope coefficient of 15.92 for the predictor "mother\'s years of schooling" (where the outcome is miles lived from mother), controlling for the child\'s earnings.', sample:'"For each additional year of schooling the mother attained, she lives nearly 16 miles farther from her child, on average, controlling for the child\'s earnings"[cite: 321].'},
+  {id:25, type:'mc', cat:'Regression Output Interpretation', text:'If the overall model F-test yields a p-value of 0.0000, what is the correct conclusion at the $\\alpha = 0.05$ level?', opts:['We fail to reject the null hypothesis; no slopes are significant.', 'We conclude that all slopes are significantly different from zero.', 'We conclude that at least one of the slopes of the predictor variables differs from zero.', 'We conclude that the intercept is significantly different from zero.'], ans:2, ok:'If we reject the null hypothesis... we conclude that at least one of the slopes of the predictor variables in the full model differs from zero [cite: 521].', no:'If we reject the null hypothesis... we conclude that at least one of the slopes of the predictor variables in the full model differs from zero[cite: 521].'},
+  {id:26, type:'fill', cat:'Regression Output Interpretation', text:'If the total sum of squares (TSS) is 1000 and the error sum of squares (SSE) is 300, what is the R-squared value? (Enter a decimal)', answer:'0.7', checker:v=>parseFloat(v)===0.7, ok:'$R^2 = (TSS - SSE) / TSS = (1000 - 300) / 1000 = 700 / 1000 = 0.70$ [cite: 870].', no:'$R^2 = (TSS - SSE) / TSS = (1000 - 300) / 1000 = 700 / 1000 = 0.70$[cite: 870].'},
+  {id:27, type:'mc', cat:'Regression Output Interpretation', text:'If a predictor has a completely standardized coefficient of 0.15, what does this indicate?', opts:['A 1-unit increase in the predictor is associated with a 0.15 unit increase in the outcome.', 'A 15% increase in the predictor leads to a 1% increase in the outcome.', 'A 0.15 standard deviation increase in the predictor is associated with a 1 standard deviation increase in the outcome.', 'A 1-standard deviation increase in the predictor is associated with a 0.15 standard deviation increase in the outcome.'], ans:3, ok:'For the completely standardized coefficient estimates, a one-standard deviation increase in [X] is associated with a [Beta] standard deviation increase in [Y] [cite: 362].', no:'For the completely standardized coefficient estimates, a one-standard deviation increase in [X] is associated with a [Beta] standard deviation increase in [Y][cite: 362].'},
+
+  // --- 8. Stata Code Interpretation ---
+  {id:28, type:'mc', cat:'Stata Code Interpretation', text:'In Stata, what does the command `test glage g2age` do after a regression?', opts:['It standardizes the variables glage and g2age.', 'It includes a constraint that both coefficients are zero in the null hypothesis, conducting a partial F-test.', 'It estimates a new regression with only glage and g2age.', 'It tests whether glage is equal to g2age.'], ans:1, ok:'By default, when we include a variable\'s name in the variable list of the test command, Stata will include a constraint that its coefficient is zero in the null hypothesis [cite: 831].', no:'By default, when we include a variable\'s name in the variable list of the test command, Stata will include a constraint that its coefficient is zero in the null hypothesis[cite: 831].'},
+  {id:29, type:'fill', cat:'Stata Code Interpretation', text:'If you type `regress hrchores` with no predictor variables listed, you are estimating an ________-only model.', answer:'intercept', checker:v=>v.trim().toLowerCase()==='intercept', ok:'The intercept-only model can be run in Stata by omitting predictor variables from the regression command: regress hrchores [cite: 564].', no:'The intercept-only model can be run in Stata by omitting predictor variables from the regression command: regress hrchores[cite: 564].'},
+  {id:30, type:'mc', cat:'Stata Code Interpretation', text:'Why is an `if` qualifier (like `if g1miles != .`) important when using Stata to compare a full model and a reduced model using a partial F-test?', opts:['To ensure both models are estimated on the exact same sample size by excluding missing data uniformly.', 'To increase the degrees of freedom for the F-test.', 'To temporarily standardize the variables for comparison.', 'To automatically calculate the Adjusted R-squared.'], ans:0, ok:'Using the if qualifier... is important because... without this if qualifier, the reduced model... would have been estimated on a larger sample size [cite: 816, 817].', no:'Using the if qualifier... is important because... without this if qualifier, the reduced model... would have been estimated on a larger sample size[cite: 816, 817].'},
+  {id:31, type:'written', cat:'Stata Code Interpretation', text:'If Stata displays the sums of squares (MSS, SSE, TSS) in scientific notation (e.g., 2.255e+09), how can you use a Stata command to view the full unrounded numbers?', sample:'You can use commands like "display %20.0f e(mss)" or "display %20.0f e(rss)" to obtain the full sums of squares without scientific notation[cite: 881, 902].'},
+
+  // --- 9. Scenario-Based Questions ---
+  {id:32, type:'mc', cat:'Scenario-Based Questions', text:' If a researcher runs 50 separate hypothesis tests from an exploratory dataset at $\\alpha = 0.05$, why is this problematic?', opts:['The overall model F-test becomes invalid.', 'The R-squared value will be artificially deflated.', 'The probability of making at least one Type I error across the tests becomes extremely high (approx 92%).', 'The sample size will effectively be reduced by 50.'], ans:2, ok:'When we conduct many tests... it is likely that—by chance... we will observe some of the extreme t-statistics... $1 - 0.95^{50} = 0.92$ [cite: 380, 398].', no:'When we conduct many tests... it is likely that—by chance... we will observe some of the extreme t-statistics... $1 - 0.95^{50} = 0.92$[cite: 380, 398].'},
+  {id:33, type:'written', cat:'Scenario-Based Questions', text:'You add a new variable to your multiple regression model. The unadjusted R-squared increases slightly, but the Adjusted R-squared decreases. What does this tell you about the new variable?', sample:'This tells you that the new variable does not help explain the variation in Y enough to overcome the penalty for losing a degree of freedom by adding it to the model[cite: 899, 900].'},
+  {id:34, type:'mc', cat:'Scenario-Based Questions', text:'You conduct a partial F-test comparing a reduced model to a full model. Your calculated F-value is 10.15, and the critical F-value at $\\alpha = 0.05$ is 3.0. What is your decision?', opts:['Fail to reject the null hypothesis; the new predictors add no value.', 'Fail to reject the alternative hypothesis.', 'Reject the null hypothesis; the new predictors significantly improve the model.', 'Accept the null hypothesis.'], ans:2, ok:'Reject the null hypothesis if the F-value is greater than the critical F at the given alpha level...[cite: 506]. 10.15 > 3.0.', no:'Reject the null hypothesis if the F-value is greater than the critical F at the given alpha level...[cite: 506]. 10.15 > 3.0.'},
+  {id:35, type:'fill', cat:'Scenario-Based Questions', text:'In a simulated clinical trial, patients were randomly assigned to fake treatments. After many data cuts, one "treatment" looked superior simply due to chance. This is a classic example of making a Type ________ error.', answer:'I', checker:v=>v.trim().toUpperCase()==='I'||v.trim()==='1', ok:'Across numerous tests, some cases were identified in which the treatment group looked better... even though these groups in fact did not receive different treatments (Type I error) [cite: 400, 401].', no:'Across numerous tests, some cases were identified in which the treatment group looked better... even though these groups in fact did not receive different treatments (Type I error)[cite: 400, 401].'}
+];
+
+const TOTAL = Q.length;
+
+// ═══════════════════════════════════════
+// UI RENDERING
+// ═══════════════════════════════════════
+function render(){
+  const a = document.getElementById('app');
+  if(state.done){renderResults(a);return}
+  let answered = Object.keys(state.answers).length;
+  let correct = Object.values(state.scores).filter(v=>v).length;
+  let pct = Math.round((answered/TOTAL)*100);
+  
+  let html = `<div class="exam-header"><h1>Multivariate Regression Chapter Exam</h1><p>Gordon Ch. 6 · Comprehensive Assessment</p>
+    <div class="exam-meta"><span class="meta-pill"><b>${TOTAL}</b> Questions</span><span class="meta-pill"><b>9</b> Categories</span><span class="meta-pill">Progress <b>Saved</b></span></div></div>`;
+  
+  html += `<div class="progress-strip"><div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <span class="progress-text">${answered}/${TOTAL}</span>
+    <span class="score-text">${correct}✓</span></div></div>`;
+  
+  html += `<div class="q-nav">`;
+  for(let i=0; i<TOTAL; i++){
+    let cls='q-dot';
+    if(i===state.cur)cls+=' active';
+    else if(state.scores[i]===true)cls+=' correct';
+    else if(state.scores[i]===false)cls+=' wrong';
+    else if(state.answers[i]!==undefined)cls+=' answered';
+    html+=`<span class="${cls}" onclick="goQ(${i})">${i+1}</span>`;
+  }
+  html+=`</div>`;
+  
+  for(let i=0; i<TOTAL; i++){ html+=renderQuestion(i); }
+  
+  html+=`<div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">`;
+  if(answered>=TOTAL){ html+=`<button class="btn btn-primary" style="font-size:15px;padding:14px 40px" onclick="finishExam()">📊 View Final Results</button>`; } 
+  else { html+=`<p style="color:var(--dim);font-size:13px">Answer all ${TOTAL} questions to unlock final results. ${TOTAL-answered} remaining.</p>`; }
+  html+=`</div>`;
+  html+=`<div class="reset-area"><button class="reset-btn" onclick="reset()">↻ Reset Exam</button></div>`;
+  
+  a.innerHTML=html;
+  Q.forEach((q,i)=>{if(q.type==='match'&&state.answers[i])restoreMatch(i)});
+}
+
+function renderQuestion(i){
+  let q=Q[i]; let vis=i===state.cur?'active':'';
+  let locked=state.answers[i]!==undefined;
+  
+  let h=`<div class="q-card ${vis}" id="qc_${i}">`;
+  h+=`<div class="q-top"><span class="q-badge">${q.cat}</span><span class="q-counter">Q${i+1}/${TOTAL}</span></div>`;
+  h+=`<div class="q-text">${q.text}</div>`;
+  
+  if(q.type==='mc'){
+    h+=`<div id="opts_${i}">`;
+    let letters='ABCD';
+    // Options are rendered sequentially; 'ans' holds the index of the correct option.
+    q.opts.forEach((o,j)=>{
+      let cls='opt-btn';
+      if(locked){
+        cls+=' locked';
+        if(j===q.ans)cls+=' correct-show';
+        else if(j===state.answers[i]&&j!==q.ans)cls+=' wrong-show';
+      }
+      h+=`<button class="${cls}" onclick="answerMC(${i},${j})"><span class="opt-letter">${letters[j]}</span>${o}</button>`;
+    });
+    h+=`</div>`;
+    h+=renderFB(i);
+  }
+  else if(q.type==='fill'){
+    let v=state.answers[i]!==undefined?state.answers[i]:'';
+    let cls='fill-input';
+    if(locked)cls+=state.scores[i]?' ok':' bad';
+    h+=`<input type="text" class="${cls}" id="inp_${i}" value="${escH(v)}" placeholder="Type your answer..." ${locked?'readonly':''} onkeydown="if(event.key==='Enter')answerFill(${i})">`;
+    if(!locked)h+=`<button class="btn btn-check btn-sm" onclick="answerFill(${i})">Check</button>`;
+    h+=renderFB(i);
+  }
+  else if(q.type==='written'){
+    let v=state.answers[i]!==undefined?state.answers[i]:'';
+    h+=`<textarea class="fill-input" id="inp_${i}" placeholder="Write your interpretation..." ${locked?'readonly':''}>${escH(v)}</textarea>`;
+    if(!locked)h+=`<button class="btn btn-check btn-sm" onclick="answerWritten(${i})">Show Model Answer</button>`;
+    h+=renderFB(i);
+  }
+  else if(q.type==='match'){
+    h+=`<div class="match-zone" id="mz_${i}">`;
+    h+=`<div>`;q.left.forEach((l,j)=>{h+=`<div class="match-item match-left" id="ml_${i}_${j}" onclick="matchClick(${i},'l',${j})">${l}</div>`});h+=`</div>`;
+    h+=`<div>`;
+    let ri=[...Array(q.right.length).keys()];
+    if(!locked)ri=shuffle(ri,i);
+    ri.forEach(j=>{h+=`<div class="match-item match-right" id="mr_${i}_${j}" onclick="matchClick(${i},'r',${j})">${q.right[j]}</div>`});
+    h+=`</div></div>`;
+    h+=renderFB(i);
+  }
+  
+  h+=`<div class="q-actions">`;
+  h+=i>0?`<button class="btn btn-ghost btn-sm" onclick="goQ(${i-1})">← Prev</button>`:`<span></span>`;
+  h+=i<TOTAL-1?`<button class="btn btn-primary btn-sm" onclick="goQ(${i+1})">Next →</button>`:`<span></span>`;
+  h+=`</div></div>`;
+  return h;
+}
+
+function renderFB(i){
+  let q=Q[i];
+  if(state.answers[i]===undefined)return `<div class="fb-box" id="fb_${i}"></div>`;
+  let isOk=state.scores[i];
+  if(q.type==='written'){
+    return `<div class="fb-box fb-sample show" id="fb_${i}"><b>📝 Model Answer:</b>${q.sample}</div>`;
+  }
+  if(q.type==='match'){
+    return `<div class="fb-box ${isOk?'fb-ok':'fb-no'} show" id="fb_${i}"><b>${isOk?'✓ All matched correctly!':'✗ Some matches were incorrect.'}</b>${isOk?'Great job making the connections.':'Review the correct pairings.'}</div>`;
+  }
+  return `<div class="fb-box ${isOk?'fb-ok':'fb-no'} show" id="fb_${i}"><b>${isOk?'✓ Correct!':'✗ Not quite.'}</b>${isOk?q.ok:q.no}</div>`;
+}
+
+// ═══════════════════════════════════════
+// LOGIC & EVENTS
+// ═══════════════════════════════════════
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function shuffle(arr,seed){let a=[...arr];for(let i=a.length-1;i>0;i--){let j=(seed*31+i*17)%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function goQ(i){state.cur=i;save();render();window.scrollTo({top:document.getElementById('qc_'+i)?.offsetTop-120||0,behavior:'smooth'})}
+function answerMC(i,j){if(state.answers[i]!==undefined)return; state.answers[i]=j;state.scores[i]=(j===Q[i].ans);state.cur=i;save();render();scrollToFB(i)}
+function answerFill(i){let inp=document.getElementById('inp_'+i);if(!inp)return;let v=inp.value.trim();if(!v)return;state.answers[i]=v;state.scores[i]=Q[i].checker(v);state.cur=i;save();render();scrollToFB(i)}
+function answerWritten(i){let inp=document.getElementById('inp_'+i);if(!inp)return;let v=inp.value.trim();if(!v){inp.style.borderColor='var(--error)';return}state.answers[i]=v;state.scores[i]=true;state.cur=i;save();render();scrollToFB(i)}
+
+let matchState={};
+function matchClick(qi,side,idx){
+  if(state.answers[qi]!==undefined)return;
+  if(!matchState[qi])matchState[qi]={sel:null,matched:[]};
+  let ms=matchState[qi];
+  if(ms.sel===null){
+    ms.sel={side,idx}; document.getElementById('m'+side[0]+'_'+qi+'_'+idx).classList.add('m-selected');
+  } else if(ms.sel.side===side){
+    document.getElementById('m'+ms.sel.side[0]+'_'+qi+'_'+ms.sel.idx).classList.remove('m-selected');
+    ms.sel={side,idx}; document.getElementById('m'+side[0]+'_'+qi+'_'+idx).classList.add('m-selected');
+  } else {
+    let l=ms.sel.side==='l'?ms.sel.idx:idx; let r=ms.sel.side==='r'?ms.sel.idx:idx;
+    let correct=Q[qi].pairs.some(p=>p[0]===l&&p[1]===r);
+    let le=document.getElementById('ml_'+qi+'_'+l); let re=document.getElementById('mr_'+qi+'_'+r);
+    document.getElementById('m'+ms.sel.side[0]+'_'+qi+'_'+ms.sel.idx).classList.remove('m-selected');
+    if(correct){
+      le.classList.add('m-matched');re.classList.add('m-matched'); ms.matched.push([l,r]);
+    } else {
+      le.classList.add('m-wrong');re.classList.add('m-wrong'); setTimeout(()=>{le.classList.remove('m-wrong');re.classList.remove('m-wrong')},800);
+    }
+    ms.sel=null;
+    if(ms.matched.length===Q[qi].pairs.length){
+      state.answers[qi]='matched';state.scores[qi]=true;save(); setTimeout(()=>render(),300);
+    } else if(ms.matched.length >= Q[qi].pairs.length){
+      state.answers[qi]='matched';state.scores[qi]=false;save(); setTimeout(()=>render(),300);
+    }
+  }
+}
+
+function restoreMatch(qi){
+  if(!Q[qi].pairs)return;
+  Q[qi].pairs.forEach(p=>{
+    let le=document.getElementById('ml_'+qi+'_'+p[0]); let re=document.getElementById('mr_'+qi+'_'+p[1]);
+    if(le)le.classList.add('m-matched');if(re)re.classList.add('m-matched');
+  });
+}
+function scrollToFB(i){setTimeout(()=>{let el=document.getElementById('fb_'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},100)}
+
+// ═══════════════════════════════════════
+// RESULTS SCREEN
+// ═══════════════════════════════════════
+function finishExam(){state.done=true;save();render();window.scrollTo({top:0})}
+function renderResults(a){
+  let correct=Object.values(state.scores).filter(v=>v).length;
+  let pct=Math.round((correct/TOTAL)*100);
+  let grade=pct>=90?'A':pct>=80?'B':pct>=70?'C':pct>=60?'D':'F';
+  let gradeColor=pct>=80?'good':pct>=65?'mid':'low';
+  
+  let catStats={};
+  Q.forEach((q,i)=>{
+    if(!catStats[q.cat])catStats[q.cat]={total:0,correct:0};
+    catStats[q.cat].total++; if(state.scores[i])catStats[q.cat].correct++;
+  });
+  
+  let struggles=[];
+  Object.entries(catStats).forEach(([cat,s])=>{
+    let cpct=Math.round((s.correct/s.total)*100);
+    if(cpct<70)struggles.push({cat,cpct,correct:s.correct,total:s.total});
+  });
+  struggles.sort((a,b)=>a.cpct-b.cpct);
+  
+  let h=`<div class="results-screen show">`;
+  h+=`<div style="font-size:14px;color:var(--dim);text-transform:uppercase;letter-spacing:2px">Final Results</div>`;
+  h+=`<div class="results-score">${correct} / ${TOTAL}</div>`;
+  h+=`<div class="results-pct">${pct}% · Grade: ${grade}</div>`;
+  h+=`<div class="results-grid">
+      <div class="results-card"><div class="rc-label">Total Correct</div><div class="rc-val ${gradeColor}">${correct}</div></div>
+      <div class="results-card"><div class="rc-label">Total Questions</div><div class="rc-val">${TOTAL}</div></div>
+      <div class="results-card"><div class="rc-label">Accuracy</div><div class="rc-val ${gradeColor}">${pct}%</div></div>
+      <div class="results-card"><div class="rc-label">Grade</div><div class="rc-val ${gradeColor}">${grade}</div></div>
+    </div>`;
+    
+  h+=`<div style="text-align:left;margin:24px 0"><h3 style="font-family:var(--serif);font-size:18px;color:var(--bright);margin-bottom:16px">Breakdown by Category</h3>
+      <table class="dt"><thead><tr><th>Category</th><th>Correct</th><th>Total</th><th>%</th></tr></thead><tbody>`;
+  Object.entries(catStats).forEach(([cat,s])=>{
+    let cpct=Math.round((s.correct/s.total)*100);
+    let cl=cpct>=80?'color:var(--success)':cpct>=60?'color:var(--warn)':'color:var(--error)';
+    h+=`<tr><td>${cat}</td><td>${s.correct}</td><td>${s.total}</td><td style="${cl};font-weight:600">${cpct}%</td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  
+  if(struggles.length>0){
+    h+=`<div class="struggle-list"><h3>⚠ Areas to Review</h3>`;
+    struggles.forEach(s=>{h+=`<div class="struggle-item"><strong>${s.cat}</strong> — ${s.correct}/${s.total} correct (${s.cpct}%)</div>`});
+    h+=`</div>`;
+  }
+  
+  h+=`<div style="margin-top:32px"><button class="btn btn-ghost" onclick="state.done=false;state.cur=0;save();render()">← Review Questions</button></div>`;
+  h+=`<div class="reset-area"><button class="reset-btn" onclick="reset()">↻ Reset Exam</button></div>`;
+  h+=`</div>`;
+  a.innerHTML=h;
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+load();
+render();
+</script>
+</body>
+</html>
