@@ -19,7 +19,7 @@ Interactive study guides + practice exams with **live Stata code examples** you 
 |-------------|-----------------|-------------------|
 | **Ch 5** Bivariate Regression| [📖 Ch 5 Guide](bivariate-regression-learning-lab.html) | [📝 Ch 6 Exam] |
 | **Ch 6** Multiple Regression | [📖 Ch 6 Guide](mult-regression-learning-lab.html) | [📝 Ch 6 Exam] |
-| **Ch 6** Multiple Regression | [📖 Ch 6 Guide](mult-regression-learning-lab.html) | [📝 Ch 6 Exam] |
+| **Ch 6** Multiple Regression | [📖 Ch 6 Guide](dummy-variables-learning-lab.html) | [📝 Ch 6 Exam] |
 > ** Click any link → opens interactive page with Stata examples + explanations**
 
 ##  How to Use
