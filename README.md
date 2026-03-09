@@ -44,7 +44,7 @@ A collection of **interactive, browser-based study tools** covering OLS regressi
 
 | Chapter | Topic | Learning Lab | Practice Exam | Status |
 |:-------:|-------|:------------:|:-------------:|:------:|
-| **5** | Bivariate Regression | [📖 Open Lab](bivariate-regression-learning-lab.html) | 📝 Coming Soon | ✅ Live |
+| **5** | Bivariate Regression | [📖 Open Lab](bivariate-regression-learning-lab.html) | [📝 Open Exam](bivariate-regression-exam.html) | ✅ Live |
 | **6** | Multiple Regression | [📖 Open Lab](mult-regression-learning-lab.html) | [📝 Open Exam](mult-regression-exam.html) | ✅ Live |
 | **7** | Dummy Variables | [📖 Open Lab](dummy-variables-learning-lab.html) | [📝 Open Exam](dummy-variables-chapter-exam.html) | ✅ Live |
 | **8** | Interactions | 🔜 Coming Soon | 🔜 Coming Soon | 🚧 In Progress |
