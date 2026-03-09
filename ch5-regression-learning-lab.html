@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch 5: Bivariate Regression Learning Lab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0f1117;--surface:#181b24;--surface2:#1e2230;--surface3:#252a3a;--border:#2a2f42;--text:#e2e4ea;--text-dim:#8b90a0;--text-bright:#fff;--accent:#6c9cfc;--accent2:#4ecdc4;--accent3:#ff6b9d;--success:#4ecdc4;--warn:#ffd166;--error:#ff6b6b;--code-bg:#141720;--radius:12px;--radius-sm:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s}
+.sidebar-header{padding:24px 20px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-family:'Source Serif 4',serif;font-size:18px;font-weight:700;color:var(--accent);line-height:1.3}
+.sidebar-header p{font-size:11px;color:var(--text-dim);margin-top:4px;text-transform:uppercase;letter-spacing:1.5px}
+.progress-bar-container{padding:12px 20px;border-bottom:1px solid var(--border)}
+.progress-label{font-size:11px;color:var(--text-dim);margin-bottom:6px;display:flex;justify-content:space-between}
+.progress-track{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s;width:0%}
+.nav-list{flex:1;overflow-y:auto;padding:12px 0}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;transition:all .2s;font-size:13px;color:var(--text-dim)}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--surface2);color:var(--accent);border-right:2px solid var(--accent)}
+.nav-item.completed .nav-dot{background:var(--success)}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.nav-item.active .nav-dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.sidebar-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.sidebar-footer .stat{font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between}
+.reset-btn{width:100%;padding:8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-size:12px;cursor:pointer;font-family:'DM Sans';transition:all .2s}
+.reset-btn:hover{border-color:var(--error);color:var(--error)}
+.main{margin-left:280px;min-height:100vh}
+.module-container{max-width:820px;margin:0 auto;padding:48px 40px 80px}
+h2.module-title{font-family:'Source Serif 4',serif;font-size:32px;font-weight:700;color:var(--text-bright);margin-bottom:8px;line-height:1.3}
+.module-subtitle{font-size:14px;color:var(--text-dim);margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+h3{font-family:'Source Serif 4',serif;font-size:22px;font-weight:600;color:var(--text-bright);margin:32px 0 12px}
+h4{font-size:15px;font-weight:600;color:var(--accent);margin:24px 0 8px;text-transform:uppercase;letter-spacing:.5px}
+p{margin-bottom:14px;font-size:15px}
+.hl{color:var(--accent);font-weight:600}.hl2{color:var(--accent2);font-weight:600}.hl3{color:var(--accent3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:20px 0}
+.card-accent{border-left:3px solid var(--accent);background:var(--surface2)}
+.card-success{border-left:3px solid var(--success)}
+.card-warn{border-left:3px solid var(--warn)}
+.card-error{border-left:3px solid var(--error)}
+.card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;display:block}
+.card-label.blue{color:var(--accent)}.card-label.green{color:var(--success)}.card-label.yellow{color:var(--warn)}.card-label.pink{color:var(--accent3)}
+.formula-block{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px 24px;font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--accent);margin:16px 0;text-align:center;line-height:2}
+code,.code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--accent2)}
+.stata-block{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);line-height:1.8;overflow-x:auto;white-space:pre}
+.interactive-zone{background:linear-gradient(135deg,rgba(108,156,252,.06),rgba(78,205,196,.06));border:1px solid rgba(108,156,252,.2);border-radius:var(--radius);padding:28px;margin:24px 0}
+.interactive-zone h4{margin-top:0}
+.slider-group{margin:16px 0}
+.slider-group label{display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin-bottom:6px}
+.slider-group label span{color:var(--accent);font-weight:600;font-family:'JetBrains Mono',monospace}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;background:var(--surface3);border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;box-shadow:0 0 8px rgba(108,156,252,.4)}
+.computed-result{background:var(--code-bg);border-radius:var(--radius-sm);padding:16px 20px;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);border:1px solid var(--border)}
+.computed-result .val{color:var(--accent);font-weight:600}.computed-result .val2{color:var(--accent2);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans'}
+.btn-primary{background:var(--accent);color:#0f1117}.btn-primary:hover{background:#84aeff;transform:translateY(-1px)}
+.btn-secondary{background:var(--surface3);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--border)}
+.q-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:20px 0;position:relative}
+.q-block h4{margin-top:0;color:var(--accent2)}
+.q-num{position:absolute;top:16px;right:20px;font-size:11px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.option-btn{display:block;width:100%;text-align:left;padding:12px 16px;margin:8px 0;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:14px;cursor:pointer;transition:all .2s;font-family:'DM Sans';line-height:1.5}
+.option-btn:hover{border-color:var(--accent);background:var(--surface3)}
+.option-btn.correct{border-color:var(--success);background:rgba(78,205,196,.1);color:var(--success)}
+.option-btn.incorrect{border-color:var(--error);background:rgba(255,107,107,.1);color:var(--error)}
+.option-btn.disabled{pointer-events:none;opacity:.6}
+.option-btn.show-correct{border-color:var(--success);opacity:1!important}
+.fb{margin-top:16px;padding:16px 20px;border-radius:var(--radius-sm);font-size:14px;display:none;line-height:1.6}
+.fb.show{display:block}
+.fb.correct-fb{background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.3);color:var(--success)}
+.fb.incorrect-fb{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);color:#ffa0a0}
+.fb strong{display:block;margin-bottom:4px}
+.retry-btn{margin-top:12px;padding:7px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-size:12px;cursor:pointer;font-family:'DM Sans'}
+.retry-btn:hover{border-color:var(--accent);color:var(--accent)}
+.text-input-group{margin:12px 0}
+.text-input{width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'DM Sans';outline:none;transition:border-color .2s}
+.text-input:focus{border-color:var(--accent)}
+.text-input.correct-input{border-color:var(--success);background:rgba(78,205,196,.05)}
+.text-input.incorrect-input{border-color:var(--error);background:rgba(255,107,107,.05)}
+textarea.text-input{min-height:80px;resize:vertical;line-height:1.6}
+.check-btn{margin-top:8px;padding:10px 20px;background:var(--accent);color:#0f1117;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans'}
+.check-btn:hover{background:#84aeff}
+.expandable{margin:12px 0}
+.expand-trigger{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;width:100%;color:var(--text-dim);font-size:13px;font-weight:500;transition:all .2s;font-family:'DM Sans'}
+.expand-trigger:hover{color:var(--text);border-color:var(--accent)}
+.expand-trigger .arrow{transition:transform .2s}
+.expand-trigger.open .arrow{transform:rotate(90deg)}
+.expand-content{display:none;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);font-size:14px;line-height:1.7}
+.expand-content.open{display:block}
+.module-nav{display:flex;justify-content:space-between;margin-top:48px;padding-top:24px;border-top:1px solid var(--border)}
+.data-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+.data-table th{text-align:left;padding:10px 12px;background:var(--surface3);color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:11px;border-bottom:1px solid var(--border)}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+canvas.chart{width:100%;max-height:280px;margin:12px 0;border-radius:var(--radius-sm)}
+.mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:var(--surface);border-bottom:1px solid var(--border);z-index:200;padding:0 16px;align-items:center;justify-content:space-between}
+.hamburger{background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+@media(max-width:768px){.mobile-header{display:flex}.sidebar{transform:translateX(-100%);z-index:300}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding-top:56px}.module-container{padding:24px 16px 80px}h2.module-title{font-size:26px}}
+.fade-in{animation:fadeIn .4s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="mobile-header">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <span style="font-weight:600;font-size:14px;color:var(--accent)">Ch 5 Learning Lab</span>
+  <span style="font-size:12px;color:var(--text-dim)" id="mobileProgress">0%</span>
+</div>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><h1>Bivariate Regression<br>Learning Lab</h1><p>Gordon Ch. 5 · Interactive</p></div>
+  <div class="progress-bar-container"><div class="progress-label"><span>Progress</span><span id="progressPct">0%</span></div><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></div>
+  <div class="nav-list" id="navList"></div>
+  <div class="sidebar-footer">
+    <div class="stat"><span>Modules visited</span><span id="statsVisited">0/10</span></div>
+    <div class="stat"><span>Questions answered</span><span id="statsAnswered">0</span></div>
+    <button class="reset-btn" onclick="resetProgress()">↻ Reset All Progress</button>
+  </div>
+</nav>
+<div class="main"><div class="module-container" id="moduleContainer"></div></div>
+
+<script>
+const STORAGE_KEY='ch5_regression_lab_v1';
+let currentModule=0;
+const completed=new Set();
+let totalAnswered=0;
+let totalCorrect=0;
+
+function saveProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({currentModule,completed:[...completed],totalAnswered,totalCorrect,ts:Date.now()}))}catch(e){}}
+function loadProgress(){try{const r=localStorage.getItem(STORAGE_KEY);if(!r)return false;const s=JSON.parse(r);currentModule=s.currentModule||0;(s.completed||[]).forEach(i=>completed.add(i));totalAnswered=s.totalAnswered||0;totalCorrect=s.totalCorrect||0;return true}catch(e){return false}}
+function resetProgress(){var btn=document.querySelector('.reset-btn');if(!btn.dataset.armed){btn.dataset.armed='1';btn.textContent='⚠ Click again to confirm reset';btn.style.borderColor='var(--error)';btn.style.color='var(--error)';setTimeout(function(){delete btn.dataset.armed;btn.textContent='↻ Reset All Progress';btn.style.borderColor='';btn.style.color=''},3000);return}delete btn.dataset.armed;btn.textContent='↻ Reset All Progress';btn.style.borderColor='';btn.style.color='';try{localStorage.removeItem(STORAGE_KEY)}catch(e){}currentModule=0;completed.clear();totalAnswered=0;totalCorrect=0;qCounter=0;buildNav();renderModule();updateProgress();saveProgress()}
+
+let qCounter=0;
+function uid(){return 'q'+(++qCounter)}
+
+function checkMCQ(id,chosen,correct){const btns=document.querySelectorAll('#'+id+'_opts .option-btn');const fb=document.getElementById(id+'_fb');const block=document.getElementById(id);btns.forEach((b,i)=>{b.classList.add('disabled');if(i===chosen)b.classList.add(chosen===correct?'correct':'incorrect');if(i===correct&&chosen!==correct)b.classList.add('show-correct')});const isCorrect=chosen===correct;if(isCorrect)totalCorrect++;totalAnswered++;saveProgress();fb.className='fb show '+(isCorrect?'correct-fb':'incorrect-fb');const feedbacks=JSON.parse(block.getAttribute('data-fb')||'["",""]');fb.innerHTML='<strong>'+(isCorrect?'✓ Correct!':'✗ Not quite.')+'</strong>'+feedbacks[isCorrect?0:1]+'<br><button class="retry-btn" onclick="retryMCQ(\''+id+'\')">↻ Try Again</button>'}
+function retryMCQ(id){document.querySelectorAll('#'+id+'_opts .option-btn').forEach(b=>{b.classList.remove('correct','incorrect','disabled','show-correct')});document.getElementById(id+'_fb').className='fb';document.getElementById(id+'_fb').innerHTML=''}
+
+function checkText(id){const block=document.getElementById(id);const input=document.getElementById(id+'_input');const fb=document.getElementById(id+'_fb');const val=input.value.trim();if(!val){input.style.borderColor='var(--error)';return}const checker=block.getAttribute('data-checker');const isCorrect=window[checker](val);input.classList.add(isCorrect?'correct-input':'incorrect-input');input.setAttribute('readonly','true');if(isCorrect)totalCorrect++;totalAnswered++;saveProgress();const cfb=decodeURIComponent(block.getAttribute('data-cfb'));const ifb=decodeURIComponent(block.getAttribute('data-ifb'));fb.className='fb show '+(isCorrect?'correct-fb':'incorrect-fb');fb.innerHTML='<strong>'+(isCorrect?'✓ Correct!':'✗ Not quite.')+'</strong>'+(isCorrect?cfb:ifb)+'<br><button class="retry-btn" onclick="retryText(\''+id+'\')">↻ Try Again</button>'}
+function retryText(id){const input=document.getElementById(id+'_input');input.classList.remove('correct-input','incorrect-input');input.removeAttribute('readonly');input.value='';input.focus();document.getElementById(id+'_fb').className='fb';document.getElementById(id+'_fb').innerHTML=''}
+
+function showSample(id){const block=document.getElementById(id);const fb=document.getElementById(id+'_fb');const sample=block.getAttribute('data-sample');totalAnswered++;saveProgress();fb.className='fb show correct-fb';fb.innerHTML='<strong>📝 Model Answer:</strong>'+sample+'<br><br><em style="color:var(--text-dim)">Compare your response. Did you include: (1) direction and magnitude, (2) "on average," (3) both variable names, (4) probabilistic language?</em><br><button class="retry-btn" onclick="retryText(\''+id+'\')">↻ Try Again</button>'}
+
+function attachFB(id,c,i){const el=document.getElementById(id);if(el)el.setAttribute('data-fb',JSON.stringify([c,i]))}
+function attachSample(id,s){const el=document.getElementById(id);if(el)el.setAttribute('data-sample',s)}
+
+// ═══════════════════════════════════════════
+// MODULES — Ch 5: Bivariate Regression
+// ═══════════════════════════════════════════
+const MODULES=[
+
+// ── 0: WELCOME ──
+{id:'intro',title:'Welcome',subtitle:'How this lab works',render(el){
+el.innerHTML=`<h2 class="module-title">Welcome to the Bivariate Regression Learning Lab</h2>
+<p class="module-subtitle">Gordon Chapter 5 · Interactive Deep-Dive</p>
+<p>This tool teaches you the core concepts of <span class="hl">bivariate (simple) regression</span> — the foundation for everything that follows in Chapters 6–12.</p>
+<div class="card card-accent"><span class="card-label blue">For Every Concept You'll Get</span>
+<p>📖 <strong>Teaching explanation</strong> — clear, plain-language walkthrough</p>
+<p>🔧 <strong>Interactive explorers</strong> — sliders and calculators to manipulate ideas</p>
+<p>✏️ <strong>Multiple practice questions</strong> — MCQ, numerical input, and written interpretation</p>
+<p>💬 <strong>Detailed teaching feedback</strong> — explains <em>why</em> an answer is right or wrong</p>
+<p style="margin:0">↻ <strong>Retry system</strong> — every question can be retried unlimited times</p>
+</div>
+<div class="card card-success"><span class="card-label green">Your Progress is Saved</span>
+<p style="margin:0">Close the tab and come back anytime — your module position and stats are saved in your browser automatically.</p>
+</div>
+<p>Use the sidebar to navigate. Modules build on each other, so working in order is recommended.</p>`;
+}},
+
+// ── 1: THE MODEL ──
+{id:'model',title:'1. The Regression Model',subtitle:'Systematic + stochastic components',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid();
+el.innerHTML=`<h2 class="module-title">The Bivariate Regression Model</h2>
+<p class="module-subtitle">Module 1 · Population model, sample model, and the error term</p>
+
+<h3>Two Components of Every Regression</h3>
+<p>Regression models the relationship between an outcome <span class="hl">Y</span> and a predictor <span class="hl">X</span>. The population model is:</p>
+<div class="formula-block">Y<sub>i</sub> = β<sub>0</sub> + β<sub>1</sub>X<sub>i</sub> + ε<sub>i</sub> &nbsp;&nbsp; (Equation 5.2)</div>
+
+<div class="card card-accent"><span class="card-label blue">The Two Parts</span>
+<p><strong>Systematic component</strong> (β₀ + β₁X): The regression line itself. It captures the <em>conditional mean</em> of Y at each level of X — the average Y we expect for a given X value.</p>
+<p style="margin:0"><strong>Stochastic component</strong> (ε): The error term. It captures all reasons an individual's Y differs from the conditional mean: omitted variables, behavioral randomness, measurement imprecision. It is <em>not</em> a "mistake."</p>
+</div>
+
+<h3>Population vs. Sample</h3>
+<table class="data-table"><thead><tr><th>Concept</th><th>Population</th><th>Sample</th></tr></thead>
+<tbody>
+<tr><td><strong>Model</strong></td><td>Y = β₀ + β₁X + ε</td><td>Y = β̂₀ + β̂₁X + ê</td></tr>
+<tr><td><strong>Parameters</strong></td><td>β₀, β₁, σ² (Greek, unknown)</td><td>β̂₀, β̂₁, σ̂² (hats, estimated)</td></tr>
+<tr><td><strong>Regression line</strong></td><td>E(Y|X) = β₀ + β₁X</td><td>Ŷ = β̂₀ + β̂₁X</td></tr>
+<tr><td><strong>Deviations</strong></td><td>ε (never observed)</td><td>ê = Y − Ŷ (residuals)</td></tr>
+</tbody></table>
+
+<div class="card card-warn"><span class="card-label yellow">Common Mistake</span>
+<p style="margin:0">Confusing the <strong>error term</strong> (ε, a population concept we can never observe) with the <strong>residual</strong> (ê, our sample-based estimate of it). They are related but not the same thing.</p></div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 4</span>
+<h4>✏️ In the model Y = β₀ + β₁X + ε, the systematic component is:</h4>
+<div id="${q1}_opts">
+<button class="option-btn" onclick="checkMCQ('${q1}',0,1)">A) ε — the error term</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',1,1)">B) β₀ + β₁X — the conditional mean of Y given X</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',2,1)">C) Y — the observed outcome</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',3,1)">D) β₁ — the slope coefficient</button>
+</div><div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 4</span>
+<h4>✏️ Greek letters (β₀, β₁) represent ___; hats (β̂₀, β̂₁) represent ___.</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,0)">A) Population parameters; sample estimates</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,0)">B) Sample estimates; population parameters</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,0)">C) Bivariate models; multiple regression models</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 4</span>
+<h4>✏️ The error term (ε) represents:</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,2)">A) Mistakes in data entry</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,2)">B) The difference between population and sample slope</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,2)">C) All factors that cause individual Y values to deviate from the conditional mean, including omitted variables and randomness</button>
+</div><div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 4</span>
+<h4>✏️ Which quantity can we actually calculate from our data?</h4>
+<div id="${q4}_opts">
+<button class="option-btn" onclick="checkMCQ('${q4}',0,1)">A) The population error ε</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',1,1)">B) The residual ê = Y − Ŷ</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',2,1)">C) The true population slope β₁</button>
+</div><div class="fb" id="${q4}_fb"></div></div>`;
+
+attachFB(q1,' The systematic component β₀ + β₁X is the "predictable" part — the regression line that gives E(Y|X). The error term ε is the stochastic (random) part.',' The systematic component is <strong>β₀ + β₁X</strong>. It gives the conditional mean E(Y|X). The error ε is the stochastic component — the unpredictable part.');
+attachFB(q2,' Greek letters = unknown population truth. Hats = our best sample-based estimates. This convention (Box 5.2 in Gordon) applies throughout the course.',' Convention: <strong>Greek = population</strong> (unknown); <strong>hats = sample estimates</strong> (calculated). β₁ is truth; β̂₁ is our guess.');
+attachFB(q3,' The error captures ALL variation in Y beyond X: omitted variables, behavioral randomness, and any measurement imprecision. It is not a "mistake" — it is the fundamental variability of human outcomes.',' ε represents <strong>all sources of variation</strong> in Y beyond X — not just measurement error. Omitted variables, inherent randomness, and imprecision all contribute.');
+attachFB(q4,' The residual ê = Y − Ŷ is observable — it\'s the difference between the actual data and our prediction. The population error ε is never observable; the true slope β₁ is unknown.',' We can calculate <strong>residuals</strong> (ê = Y − Ŷ) from our data. The population error ε and true parameters β₀, β₁ are never directly observed.');
+}},
+
+// ── 2: THE REGRESSION EQUATION ──
+{id:'equation',title:'2. Intercept & Slope',subtitle:'What the numbers mean',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid(),q5=uid();
+el.innerHTML=`<h2 class="module-title">The Intercept and Slope</h2>
+<p class="module-subtitle">Module 2 · Interpreting the two numbers that define the line</p>
+
+<h3>The Intercept (β₀)</h3>
+<p>The intercept is the expected value of Y when X = 0. Geometrically, it's where the line crosses the Y-axis.</p>
+<div class="card card-warn"><span class="card-label yellow">When Is It Meaningful?</span>
+<p style="margin:0">The intercept is only substantively meaningful when <strong>X = 0 is a plausible value within the data range</strong>. If zero years of education, zero earnings, or zero age is impossible or outside your sample, the intercept is just a mathematical anchor — not a meaningful prediction.</p></div>
+
+<h3>The Slope (β₁)</h3>
+<p>The slope is the expected change in Y for each <span class="hl">one-unit increase</span> in X. In a linear model, this rate of change is <strong>constant</strong> — the same everywhere on the line.</p>
+
+<div class="interactive-zone">
+<h4>🔧 Interactive: Regression Line Builder</h4>
+<p>Adjust intercept and slope to see the line change in real time:</p>
+<div class="slider-group"><label>Intercept (β₀): <span id="b0v">24</span></label><input type="range" min="0" max="60" value="24" id="b0s" oninput="updLine()"></div>
+<div class="slider-group"><label>Slope (β₁): <span id="b1v">6</span></label><input type="range" min="-10" max="15" value="6" step="0.5" id="b1s" oninput="updLine()"></div>
+<div class="computed-result" id="lineEq">Ŷ = <span class="val">24</span> + <span class="val2">6</span> × X</div>
+<canvas class="chart" id="lineCanvas" height="240"></canvas>
+<table class="data-table"><thead><tr><th>X</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+<tbody><tr><th>Ŷ</th><td id="p0">24</td><td id="p1">30</td><td id="p2">36</td><td id="p3">42</td><td id="p4">48</td></tr></tbody></table>
+<p style="margin-top:12px;font-size:13px;color:var(--text-dim)">Notice: each step in X always adds the <em>same</em> amount to Y. That constancy is what makes this model "linear."</p>
+</div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 5</span>
+<h4>✏️ If Ŷ = 3 + 0.5X, what is Ŷ when X = 6?</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q1}_input" placeholder="Enter a number..." onkeydown="if(event.key==='Enter')checkText('${q1}')"></div>
+<button class="check-btn" onclick="checkText('${q1}')">Check Answer</button>
+<div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 5</span>
+<h4>✏️ In the model Ŷ = 3 + 0.5X, if X increases from 4 to 7 (change of 3), how much does Y change?</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q2}_input" placeholder="ΔY = ..." onkeydown="if(event.key==='Enter')checkText('${q2}')"></div>
+<button class="check-btn" onclick="checkText('${q2}')">Check Answer</button>
+<div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 5</span>
+<h4>✏️ A regression of test scores on hours studied gives β̂₀ = 40 and β̂₁ = 5. Hours range from 1 to 20. Is the intercept meaningful?</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,1)">A) Yes — zero hours is always meaningful.</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,1)">B) It depends — is X = 0 (zero hours studied) plausible? If so, the intercept means a student who doesn't study is expected to score 40.</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,1)">C) No — the intercept is never meaningful.</button>
+</div><div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 5</span>
+<h4>✏️ What happens to the regression equation when β₁ = 0?</h4>
+<div id="${q4}_opts">
+<button class="option-btn" onclick="checkMCQ('${q4}',0,0)">A) The equation becomes Y = β₀ — a flat horizontal line where Y doesn't change with X (X and Y are unrelated).</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',1,0)">B) The equation becomes Y = 0.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',2,0)">C) The regression model is invalid.</button>
+</div><div class="fb" id="${q4}_fb"></div></div>
+
+<div class="q-block" id="${q5}"><span class="q-num">Q5 of 5</span>
+<h4>✏️ A slope of −0.25 for "hours of paid work" predicting "hours of chores" means:</h4>
+<div id="${q5}_opts">
+<button class="option-btn" onclick="checkMCQ('${q5}',0,1)">A) Women who work more do fewer chores, on average.</button>
+<button class="option-btn" onclick="checkMCQ('${q5}',1,1)">B) For each additional hour of paid work, the woman is expected to do 0.25 fewer hours of chores per week, on average.</button>
+<button class="option-btn" onclick="checkMCQ('${q5}',2,1)">C) 25% of chores are eliminated by working.</button>
+</div><div class="fb" id="${q5}_fb"></div></div>`;
+
+window['ck_'+q1]=function(v){return parseFloat(v)===6};
+document.getElementById(q1).setAttribute('data-checker','ck_'+q1);
+document.getElementById(q1).setAttribute('data-cfb',encodeURIComponent(' Ŷ = 3 + 0.5(6) = 3 + 3 = <strong>6</strong>. Plug in X, multiply by the slope, add the intercept.'));
+document.getElementById(q1).setAttribute('data-ifb',encodeURIComponent(' Ŷ = 3 + 0.5(6) = 3 + 3 = <strong>6</strong>. Multiply the slope (0.5) by X (6) and add the intercept (3).'));
+window['ck_'+q2]=function(v){return parseFloat(v)===1.5};
+document.getElementById(q2).setAttribute('data-checker','ck_'+q2);
+document.getElementById(q2).setAttribute('data-cfb',encodeURIComponent(' ΔY = β₁ × ΔX = 0.5 × 3 = <strong>1.5</strong>. Because the model is linear, the change in Y equals the slope times the change in X — regardless of the starting point.'));
+document.getElementById(q2).setAttribute('data-ifb',encodeURIComponent(' ΔY = slope × ΔX = 0.5 × 3 = <strong>1.5</strong>. In a linear model, the change is always β₁ × (change in X).'));
+attachFB(q3,' The key question is whether X = 0 falls within the plausible data range. If students who study zero hours exist in the context, the intercept is meaningful: expected score of 40 with no studying. Gordon emphasizes this requires careful judgment about each application.',' Ask: <strong>Is X = 0 plausible?</strong> If zero hours is possible and makes substantive sense, the intercept means "expected score of 40 for someone who doesn\'t study." If zero is impossible (like zero age), it\'s not meaningful.');
+attachFB(q4,' When β₁ = 0, the equation becomes Y = β₀ + 0·X = β₀. The line is flat, meaning Y doesn\'t change with X — they are unrelated. This is exactly what the null hypothesis H₀: β₁ = 0 represents.',' When β₁ = 0: Y = β₀ + 0·X = β₀. The line is <strong>flat/horizontal</strong>, meaning X and Y are linearly unrelated.');
+attachFB(q5,' This is a model interpretation with all required elements: direction (fewer), magnitude (0.25), both variables (paid work → chores), and probabilistic language (on average). The negative slope means the association is negative.',' "For each additional hour of paid work, the woman is expected to do 0.25 fewer hours of chores per week, on average." This includes direction, magnitude, both variables, and probabilistic language.');
+
+window.updLine=function(){var b0=+document.getElementById('b0s').value,b1=+document.getElementById('b1s').value;
+document.getElementById('b0v').textContent=b0;document.getElementById('b1v').textContent=b1;
+document.getElementById('lineEq').innerHTML='Ŷ = <span class="val">'+b0+'</span> + <span class="val2">'+b1+'</span> × X';
+for(var x=0;x<=4;x++){var el=document.getElementById('p'+x);if(el)el.textContent=(b0+b1*x).toFixed(1)}
+drawLine(b0,b1)};
+window.drawLine=function(b0,b1){var c=document.getElementById('lineCanvas');if(!c)return;var ctx=c.getContext('2d'),W=c.width=c.offsetWidth*2,H=c.height=480;ctx.scale(2,2);var w=W/2,h=H/2;ctx.clearRect(0,0,w,h);ctx.fillStyle='#141720';ctx.fillRect(0,0,w,h);
+var p={l:50,r:20,t:20,b:35},pw=w-p.l-p.r,ph=h-p.t-p.b;var xMax=5,yMax=Math.max(80,b0+b1*5+10,b0+10);
+function tx(v){return p.l+v/xMax*pw}function ty(v){return p.t+ph-v/yMax*ph}
+ctx.strokeStyle='#2a2f42';ctx.lineWidth=.5;for(var y=0;y<=yMax;y+=10){ctx.beginPath();ctx.moveTo(p.l,ty(y));ctx.lineTo(w-p.r,ty(y));ctx.stroke()}
+for(var x=0;x<=xMax;x++){ctx.beginPath();ctx.moveTo(tx(x),p.t);ctx.lineTo(tx(x),p.t+ph);ctx.stroke()}
+ctx.strokeStyle='#8b90a0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.l,p.t+ph);ctx.lineTo(w-p.r,p.t+ph);ctx.stroke();ctx.beginPath();ctx.moveTo(p.l,p.t);ctx.lineTo(p.l,p.t+ph);ctx.stroke();
+ctx.fillStyle='#8b90a0';ctx.font='10px DM Sans';ctx.textAlign='center';for(var x=0;x<=xMax;x++)ctx.fillText(x,tx(x),p.t+ph+14);ctx.textAlign='right';for(var y=0;y<=yMax;y+=20)ctx.fillText(y,p.l-6,ty(y)+4);
+var seed=42,rng=seed;function rand(){rng=(rng*16807)%2147483647;return rng/2147483647}
+ctx.fillStyle='rgba(108,156,252,0.25)';for(var i=0;i<55;i++){var x=rand()*4.5,yt=b0+b1*x+(rand()-.5)*24;if(yt>=0&&yt<=yMax){ctx.beginPath();ctx.arc(tx(x),ty(yt),3,0,Math.PI*2);ctx.fill()}}
+ctx.strokeStyle='#6c9cfc';ctx.lineWidth=2.5;ctx.beginPath();var y0=b0,y5=b0+b1*xMax;ctx.moveTo(tx(0),ty(Math.max(0,Math.min(yMax,y0))));ctx.lineTo(tx(xMax),ty(Math.max(0,Math.min(yMax,y5))));ctx.stroke();
+if(y0>=0&&y0<=yMax){ctx.fillStyle='#ff6b9d';ctx.beginPath();ctx.arc(tx(0),ty(y0),5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e2e4ea';ctx.font='bold 10px JetBrains Mono';ctx.textAlign='left';ctx.fillText('β₀ = '+b0,tx(0)+8,ty(y0)-6)}};
+setTimeout(function(){updLine()},100);
+}},
+
+// ── 3: OLS ESTIMATORS ──
+{id:'ols',title:'3. OLS Estimators',subtitle:'Finding the best-fitting line',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid();
+el.innerHTML=`<h2 class="module-title">OLS: Finding the Best Line</h2>
+<p class="module-subtitle">Module 3 · How least squares works and what the formulas mean</p>
+
+<h3>The OLS Criterion</h3>
+<p>OLS finds the intercept and slope that <span class="hl">minimize the sum of squared residuals</span>: Σ(Yᵢ − Ŷᵢ)² = Σêᵢ².</p>
+
+<div class="card card-accent"><span class="card-label blue">Why Squared Errors?</span>
+<p>1. <strong>Raw errors cancel:</strong> Σêᵢ = 0 for any OLS line (positive and negative residuals balance). So minimizing raw errors doesn't work.</p>
+<p>2. <strong>Squaring penalizes large errors more</strong> — an error of 10 contributes 100; an error of 2 contributes only 4.</p>
+<p style="margin:0">3. <strong>Clean math:</strong> Squaring yields a smooth function with a unique minimum, giving us closed-form formulas.</p></div>
+
+<h3>The Formulas</h3>
+<div class="formula-block">β̂₁ = Σ(Xᵢ − X̄)(Yᵢ − Ȳ) / Σ(Xᵢ − X̄)²<br><small style="color:var(--text-dim)">Slope = Covariance(X,Y) / Variance(X)  — Eq. 5.5</small></div>
+<div class="formula-block">β̂₀ = Ȳ − β̂₁X̄<br><small style="color:var(--text-dim)">Intercept — Eq. 5.6  (guarantees line passes through (X̄, Ȳ))</small></div>
+
+<div class="card card-success"><span class="card-label green">Deep Insight</span>
+<p style="margin:0">The slope = Cov(X,Y)/Var(X). This tells you: if X and Y don't co-vary (Cov = 0), the slope is zero. If high X goes with high Y (positive Cov), the slope is positive. And the slope's magnitude depends on how strongly X and Y move together <em>relative to X's spread</em>.</p></div>
+
+<h3>Conditional Variance (σ̂²)</h3>
+<div class="formula-block">σ̂² = Σêᵢ² / (n − 2) = MSE &nbsp;&nbsp; → &nbsp;&nbsp; σ̂ = √MSE = Root MSE<br><small style="color:var(--text-dim)">Eq. 5.7 — estimated conditional variance and standard deviation</small></div>
+<p>We divide by <strong>n − 2</strong> (not n) because we've "used up" 2 degrees of freedom estimating the intercept and slope. Root MSE estimates how much Y values scatter around the regression line.</p>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 4</span>
+<h4>✏️ If Σêᵢ² = 1614.2 and n = 50, calculate the Root MSE:</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q1}_input" placeholder="Root MSE = √(SSE/(n-2)) = ..." onkeydown="if(event.key==='Enter')checkText('${q1}')"></div>
+<button class="check-btn" onclick="checkText('${q1}')">Check Answer</button>
+<div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 4</span>
+<h4>✏️ OLS guarantees that the sum of the residuals Σêᵢ equals:</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,0)">A) Zero — positive and negative residuals always cancel in OLS</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,0)">B) The slope</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,0)">C) A positive number (since we square them)</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 4</span>
+<h4>✏️ The OLS regression line always passes through which point?</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,1)">A) The origin (0, 0)</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,1)">B) The point (X̄, Ȳ) — the means of both variables</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,1)">C) The point (0, β̂₁)</button>
+</div><div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 4</span>
+<h4>✏️ If the unconditional SD of Y is 10.47 and the Root MSE is 5.80, what does this tell us?</h4>
+<div id="${q4}_opts">
+<button class="option-btn" onclick="checkMCQ('${q4}',0,0)">A) Knowing X reduces the spread of Y — the conditional SD (5.80) is smaller than the unconditional SD (10.47), meaning X helps explain variation in Y.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',1,0)">B) The model is bad because the Root MSE is not zero.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',2,0)">C) These numbers cannot be compared.</button>
+</div><div class="fb" id="${q4}_fb"></div></div>`;
+
+window['ck_'+q1]=function(v){var n=parseFloat(v);return n>=5.79&&n<=5.81};
+document.getElementById(q1).setAttribute('data-checker','ck_'+q1);
+document.getElementById(q1).setAttribute('data-cfb',encodeURIComponent(' σ̂² = 1614.2 / (50−2) = 1614.2/48 = 33.63 → σ̂ = √33.63 = <strong>5.80</strong>. This is the estimated SD of Y around the regression line at each level of X.'));
+document.getElementById(q1).setAttribute('data-ifb',encodeURIComponent(' σ̂² = SSE/(n−2) = 1614.2/48 = 33.63. Root MSE = √33.63 = <strong>5.80</strong>. Remember to divide by (n−2), not n.'));
+attachFB(q2,' Σêᵢ = 0 is a <strong>mathematical property</strong> of OLS, not an assumption. The positive residuals (above the line) exactly cancel the negative ones (below). This is precisely why we use <em>squared</em> errors to measure fit.',' The sum of OLS residuals is always exactly <strong>zero</strong>. Positive and negative residuals balance perfectly. That\'s why we square them to assess fit.');
+attachFB(q3,' The intercept formula β̂₀ = Ȳ − β̂₁X̄ guarantees the line passes through <strong>(X̄, Ȳ)</strong>. Plug in X = X̄: Ŷ = β̂₀ + β̂₁X̄ = (Ȳ − β̂₁X̄) + β̂₁X̄ = Ȳ.',' The line passes through <strong>(X̄, Ȳ)</strong>. This follows from the intercept formula: β̂₀ = Ȳ − β̂₁X̄.');
+attachFB(q4,' When σ̂ < σ̂_Y, knowing X reduces the spread of Y relative to just using the overall mean. The smaller the Root MSE relative to σ̂_Y, the more useful the predictor. This comparison is the intuition behind R².',' <strong>σ̂ (5.80) < σ̂_Y (10.47)</strong> means X helps explain variation in Y. The conditional SD is notably smaller than the unconditional SD — roughly half as large — indicating a fairly strong relationship.');
+}},
+
+// ── 4: STANDARD ERRORS ──
+{id:'se',title:'4. Standard Error of the Slope',subtitle:'Precision of your estimate',render(el){
+const q1=uid(),q2=uid(),q3=uid();
+el.innerHTML=`<h2 class="module-title">Standard Error of the Slope</h2>
+<p class="module-subtitle">Module 4 · Three factors that control precision</p>
+
+<h3>The Formula</h3>
+<div class="formula-block">σ̂<sub>β̂₁</sub> = σ̂ / √Σ(Xᵢ − X̄)²<br><small style="color:var(--text-dim)">Eq. 5.8 — Standard error of the slope estimator</small></div>
+
+<h3>Three Factors</h3>
+<table class="data-table"><thead><tr><th>Factor</th><th>Location</th><th>Effect</th><th>Intuition</th></tr></thead>
+<tbody>
+<tr><td><strong>Conditional SD (σ̂)</strong></td><td>Numerator</td><td>↑ σ̂ → ↑ SE</td><td>More scatter around line → harder to pin down slope</td></tr>
+<tr><td><strong>Variation in X</strong></td><td>Denominator</td><td>↑ Σ(X−X̄)² → ↓ SE</td><td>More X spread → you "see" more of the line</td></tr>
+<tr><td><strong>Sample size (n)</strong></td><td>Denominator*</td><td>↑ n → ↓ SE</td><td>More data → more stable estimates</td></tr>
+</tbody></table>
+<p style="font-size:13px;color:var(--text-dim)">*n doesn't appear explicitly, but more observations increase Σ(X−X̄)².</p>
+
+<div class="card card-success"><span class="card-label green">Preview: Ch. 6 & Ch. 11</span>
+<p style="margin:0">In multiple regression, this formula gains a new factor: <strong>(1 − r²₁₂)</strong> in the denominator. When predictors are correlated, this factor shrinks, inflating the SE. That's the mathematical basis for multicollinearity.</p></div>
+
+<div class="interactive-zone">
+<h4>🔧 SE Explorer</h4>
+<p>Adjust each factor and watch the standard error respond:</p>
+<div class="slider-group"><label>Conditional SD (σ̂): <span id="seS">10</span></label><input type="range" min="1" max="30" value="10" id="seSl" oninput="updSE()"></div>
+<div class="slider-group"><label>Σ(X − X̄)² (variation in X): <span id="seX">500</span></label><input type="range" min="50" max="2000" value="500" step="50" id="seXl" oninput="updSE()"></div>
+<div class="computed-result" id="seRes">SE = <span class="val2">0.447</span></div>
+</div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 3</span>
+<h4>✏️ A researcher samples only middle-income families (restricting X range). This will:</h4>
+<div id="${q1}_opts">
+<button class="option-btn" onclick="checkMCQ('${q1}',0,1)">A) Decrease the SE because the sample is more homogeneous</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',1,1)">B) Increase the SE because reducing X variation makes the denominator smaller</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',2,1)">C) Have no effect on the SE</button>
+</div><div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 3</span>
+<h4>✏️ If ALL X values in a sample were equal (say, all Xᵢ = 5), what happens to the slope estimate?</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,2)">A) The slope would be zero.</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,2)">B) The slope would be very large.</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,2)">C) The slope is undefined — Σ(X−X̄)² = 0, creating division by zero in both the slope and SE formulas.</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 3</span>
+<h4>✏️ The standard error of the slope measures:</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,1)">A) How much Y scatters around the regression line</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,1)">B) The standard deviation of the sampling distribution of β̂₁ — how much the slope estimate would vary across repeated samples</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,1)">C) The average residual</button>
+</div><div class="fb" id="${q3}_fb"></div></div>`;
+
+attachFB(q1,' Restricting X range reduces Σ(Xᵢ − X̄)², shrinking the denominator and <strong>increasing</strong> the SE. This is a practical design lesson: sample across the full range of X for more precise estimates.',' Less variation in X → smaller denominator → <strong>larger SE</strong>. Sample broadly on X for better precision.');
+attachFB(q2,' If all Xᵢ equal the same value, then Xᵢ − X̄ = 0 for every observation, so Σ(X−X̄)² = 0. This creates <strong>division by zero</strong> in both the slope formula and the SE formula. You literally cannot estimate a slope without variation in X. (This is Gordon\'s Review Exercise 5.7.)',' With no variation in X, Σ(X−X̄)² = 0 → <strong>division by zero</strong>. The slope is undefined. You need variation in X to estimate a relationship.');
+attachFB(q3,' The SE is the SD of the <strong>sampling distribution</strong> of β̂₁. It tells you how much the slope estimate would bounce around if you drew many different samples from the same population. Smaller SE = your estimate is closer to the true population value.',' The SE measures variability of the <strong>slope estimate across samples</strong>, not variability of Y around the line (that\'s the Root MSE).');
+
+window.updSE=function(){var s=+document.getElementById('seSl').value,x=+document.getElementById('seXl').value;
+document.getElementById('seS').textContent=s;document.getElementById('seX').textContent=x;
+var se=s/Math.sqrt(x);document.getElementById('seRes').innerHTML='SE = '+s+' / √'+x+' = <span class="val2">'+se.toFixed(4)+'</span>'+(se<0.3?' <span style="color:var(--success)">Very precise</span>':se<1?' <span style="color:var(--warn)">Moderate</span>':' <span style="color:var(--error)">Low precision</span>')};
+setTimeout(updSE,100);
+}},
+
+// ── 5: HYPOTHESIS TESTING ──
+{id:'testing',title:'5. Hypothesis Testing',subtitle:'Is the slope real or could it be chance?',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid(),q5=uid();
+el.innerHTML=`<h2 class="module-title">Hypothesis Testing about the Slope</h2>
+<p class="module-subtitle">Module 5 · t-tests, p-values, one-sided vs. two-sided</p>
+
+<h3>The Central Question</h3>
+<p>"Could the association I found be due to chance?" We set up a straw man — H₀: β₁ = 0 — and ask whether our data are consistent with it.</p>
+
+<div class="formula-block">t = (β̂₁ − 0) / σ̂<sub>β̂₁</sub> = β̂₁ / σ̂<sub>β̂₁</sub><br><small style="color:var(--text-dim)">"How many standard errors is the slope from zero?"  |  df = n − 2</small></div>
+
+<p>Think of t as a <span class="hl">signal-to-noise ratio</span>: numerator = signal (how far from zero), denominator = noise (how uncertain).</p>
+
+<h3>Two-Sided vs. One-Sided</h3>
+<div class="card card-accent"><span class="card-label blue">Two-Sided (Default in Stata)</span>
+<p style="margin:0">H₀: β₁ = 0 &nbsp; vs. &nbsp; Hₐ: β₁ ≠ 0. Stata's <code>P>|t|</code> is the two-sided p-value. Reject if p < 0.05 or |t| > 1.96.</p></div>
+
+<div class="card"><span class="card-label pink">One-Sided (Must Convert)</span>
+<p>If you predict a <em>direction</em> a priori (e.g., Hₐ: β₁ > 0):</p>
+<table class="data-table"><thead><tr><th>Coefficient sign matches Hₐ?</th><th>One-sided p</th></tr></thead>
+<tbody><tr><td>✓ Yes (right direction)</td><td>= Stata's p / 2</td></tr>
+<tr><td>✗ No (wrong direction)</td><td>= 1 − (Stata's p / 2)</td></tr></tbody></table></div>
+
+<div class="interactive-zone">
+<h4>🔧 t-Statistic Calculator</h4>
+<div class="slider-group"><label>β̂₁ (coefficient): <span id="tB">0.0011</span></label><input type="range" min="-0.005" max="0.005" value="0.0011" step="0.0001" id="tBs" oninput="updT()"></div>
+<div class="slider-group"><label>σ̂<sub>β̂₁</sub> (standard error): <span id="tS">0.00022</span></label><input type="range" min="0.00005" max="0.001" value="0.00022" step="0.00001" id="tSs" oninput="updT()"></div>
+<div class="computed-result" id="tRes"></div>
+</div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 5</span>
+<h4>✏️ β̂₁ = 0.0011333, SE = 0.0002185. Calculate the t-statistic:</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q1}_input" placeholder="t = β̂ / SE = ..." onkeydown="if(event.key==='Enter')checkText('${q1}')"></div>
+<button class="check-btn" onclick="checkText('${q1}')">Check Answer</button>
+<div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 5</span>
+<h4>✏️ Stata reports P>|t| = 0.000. This means the null should be:</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,0)">A) Rejected at α = 0.05 — there IS evidence of a linear association</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,0)">B) Accepted — the slope equals zero</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,0)">C) Ignored because the p-value is too small</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 5</span>
+<h4>✏️ The two-sided p-value is 0.06. You predicted a positive slope and the estimate IS positive. One-sided p = ?</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,1)">A) 0.12</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,1)">B) 0.03 — reject H₀ at α = 0.05</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,1)">C) 0.06 (unchanged)</button>
+</div><div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 5</span>
+<h4>✏️ If you fail to reject H₀: β₁ = 0, the correct statement is:</h4>
+<div id="${q4}_opts">
+<button class="option-btn" onclick="checkMCQ('${q4}',0,2)">A) We accept that there is no relationship between X and Y.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',1,2)">B) We have proven the slope is zero.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',2,2)">C) We do not have sufficient evidence to conclude that a linear relationship exists in the population.</button>
+</div><div class="fb" id="${q4}_fb"></div></div>
+
+<div class="q-block" id="${q5}"><span class="q-num">Q5 of 5</span>
+<h4>✏️ The two-sided p is 0.04. You predicted a POSITIVE slope, but the estimate is NEGATIVE. What is the one-sided p?</h4>
+<div id="${q5}_opts">
+<button class="option-btn" onclick="checkMCQ('${q5}',0,2)">A) 0.02</button>
+<button class="option-btn" onclick="checkMCQ('${q5}',1,2)">B) 0.04</button>
+<button class="option-btn" onclick="checkMCQ('${q5}',2,2)">C) 0.98 — since the sign is WRONG, one-sided p = 1 − (0.04/2) = 0.98. Fail to reject.</button>
+</div><div class="fb" id="${q5}_fb"></div></div>`;
+
+window['ck_'+q1]=function(v){var n=parseFloat(v);return n>=5.18&&n<=5.20};
+document.getElementById(q1).setAttribute('data-checker','ck_'+q1);
+document.getElementById(q1).setAttribute('data-cfb',encodeURIComponent(' t = 0.0011333 / 0.0002185 = <strong>5.19</strong>. With 6,348 df, 5.19 >> 1.96, so we decisively reject H₀.'));
+document.getElementById(q1).setAttribute('data-ifb',encodeURIComponent(' t = β̂₁ / SE = 0.0011333 / 0.0002185 = <strong>5.19</strong>. Compare to 1.96 (critical value for large n).'));
+attachFB(q2,' p = 0.000 < 0.05 → <strong>reject H₀</strong>. There IS statistically significant evidence of a linear association. We never say "accept" the null — only "reject" or "fail to reject."',' p < 0.05 → reject H₀. We conclude there IS evidence of a linear association. Never say "accept the null."');
+attachFB(q3,' Coefficient is positive (matches Hₐ: β₁ > 0), so divide p by 2: <strong>0.06/2 = 0.03</strong>. Since 0.03 < 0.05, reject H₀. This is a classic exam scenario: not significant two-sided, but significant one-sided.',' Sign matches → p/2 = 0.06/2 = <strong>0.03</strong>. Since 0.03 < 0.05, reject H₀ with the one-sided test.');
+attachFB(q4,' We never "accept" or "prove" H₀. Failing to reject means the <em>evidence is insufficient</em> — the real slope might be small but nonzero. Absence of evidence ≠ evidence of absence. <strong>Never write "accept H₀" on an exam.</strong>',' Correct phrase: "We do <strong>not have sufficient evidence</strong> to conclude..." Never "accept" or "prove" the null is true.');
+attachFB(q5,' When the coefficient\'s sign is WRONG (opposite to Hₐ), the one-sided p = 1 − (two-sided p / 2) = 1 − 0.02 = <strong>0.98</strong>. Almost certain to fail to reject. The data actively contradict your directional hypothesis.',' Wrong sign: one-sided p = 1 − (0.04/2) = 1 − 0.02 = <strong>0.98</strong>. The data contradict the predicted direction.');
+
+window.updT=function(){var b=parseFloat(document.getElementById('tBs').value),s=parseFloat(document.getElementById('tSs').value);
+document.getElementById('tB').textContent=b.toFixed(4);document.getElementById('tS').textContent=s.toFixed(5);
+var t=b/s;document.getElementById('tRes').innerHTML='t = '+b.toFixed(4)+' / '+s.toFixed(5)+' = <span class="val2">'+t.toFixed(2)+'</span>'+(Math.abs(t)>1.96?' → <span style="color:var(--success)">Significant at α = 0.05</span>':' → <span style="color:var(--text-dim)">Not significant at α = 0.05</span>')};
+setTimeout(updT,100);
+}},
+
+// ── 6: CONFIDENCE INTERVALS ──
+{id:'ci',title:'6. Confidence Intervals',subtitle:'A range of plausible values',render(el){
+const q1=uid(),q2=uid(),q3=uid();
+el.innerHTML=`<h2 class="module-title">Confidence Intervals for the Slope</h2>
+<p class="module-subtitle">Module 6 · CI = point estimate ± margin of error</p>
+
+<div class="formula-block">95% CI = β̂₁ ± 1.96 × σ̂<sub>β̂₁</sub><br><small style="color:var(--text-dim)">For large samples; use t-critical for smaller samples</small></div>
+
+<div class="interactive-zone">
+<h4>🔧 CI Calculator</h4>
+<p>From Display 5.1: β̂₁ = 0.0011333, SE = 0.0002185</p>
+<div class="computed-result">Lower = 0.0011333 − 1.96(0.0002185) = <span class="val">0.000705</span><br>Upper = 0.0011333 + 1.96(0.0002185) = <span class="val">0.001562</span><br><br>95% CI: <span class="val2" style="font-size:16px">(0.000705, 0.001562)</span><br><br><span style="color:var(--success)">Zero is NOT in this interval → Reject H₀ (consistent with the t-test)</span></div>
+</div>
+
+<div class="card card-accent"><span class="card-label blue">The CI–Test Equivalence</span>
+<p style="margin:0">If zero falls <strong>outside</strong> the 95% CI → reject H₀ at α = 0.05. If zero falls <strong>inside</strong> → fail to reject. The CI and two-sided t-test <em>always</em> agree. They are algebraically equivalent.</p></div>
+
+<div class="card card-error"><span class="card-label pink">Classic Exam Trap</span>
+<p style="margin:0"><strong>"There is a 95% probability that β₁ falls in this interval."</strong> ← WRONG. The true slope is fixed — it either IS or ISN'T inside. The "95%" refers to the <em>method</em>: 95% of CIs constructed this way would contain the true value across repeated sampling.</p></div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 3</span>
+<h4>✏️ A 95% CI for the slope is (−0.5, 3.2). Conclusion about H₀: β₁ = 0?</h4>
+<div id="${q1}_opts">
+<button class="option-btn" onclick="checkMCQ('${q1}',0,1)">A) Reject H₀ because the interval is wide</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',1,1)">B) Fail to reject H₀ because zero IS contained in the interval (−0.5, 3.2)</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',2,1)">C) Cannot tell without the p-value</button>
+</div><div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 3</span>
+<h4>✏️ β̂₁ = 5 and SE = 2. Construct a 95% CI:</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q2}_input" placeholder="(lower, upper)..." onkeydown="if(event.key==='Enter')checkText('${q2}')"></div>
+<button class="check-btn" onclick="checkText('${q2}')">Check Answer</button>
+<div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 3</span>
+<h4>✏️ Which statement about a 95% CI is correct?</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,1)">A) There's a 95% probability the true slope is in this specific interval.</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,1)">B) If we repeated sampling 100 times and built 100 CIs, about 95 would contain the true slope. This specific interval either does or doesn't.</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,1)">C) 95% of the data falls within the interval.</button>
+</div><div class="fb" id="${q3}_fb"></div></div>`;
+
+attachFB(q1,' Zero IS inside (−0.5, 3.2), so we <strong>fail to reject H₀</strong>. This is always equivalent to having p > 0.05 in the two-sided test.',' Zero is inside the interval → <strong>fail to reject H₀</strong>. The CI and two-sided test always agree.');
+window['ck_'+q2]=function(v){return /1\.08/.test(v)&&/8\.92/.test(v)};
+document.getElementById(q2).setAttribute('data-checker','ck_'+q2);
+document.getElementById(q2).setAttribute('data-cfb',encodeURIComponent(' 5 ± 1.96(2) = 5 ± 3.92 = <strong>(1.08, 8.92)</strong>. Zero is NOT in this interval → reject H₀. (Review Exercise 5.9.)'));
+document.getElementById(q2).setAttribute('data-ifb',encodeURIComponent(' CI = β̂ ± 1.96 × SE = 5 ± 1.96(2) = 5 ± 3.92 = <strong>(1.08, 8.92)</strong>. Subtract and add the margin of error.'));
+attachFB(q3,' The "95%" is a property of the <strong>procedure</strong>, not this particular interval. Across many samples, 95% of the intervals would contain the truth. For any single interval, the true value either is or isn\'t inside — we just don\'t know which.',' The 95% refers to the <strong>long-run success rate of the method</strong>. The true slope is fixed, not random — it doesn\'t have a "probability" of being somewhere.');
+}},
+
+// ── 7: RESCALING & SUBSTANTIVE SIGNIFICANCE ──
+{id:'rescale',title:'7. Rescaling & Effect Size',subtitle:'Statistical ≠ substantive significance',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid();
+el.innerHTML=`<h2 class="module-title">Rescaling & Substantive Significance</h2>
+<p class="module-subtitle">Module 7 · Making coefficients interpretable</p>
+
+<h3>The iβ̂ Rescaling Rule</h3>
+<p>If you increase X by <em>i</em> units, Y changes by <span class="hl">i × β̂₁</span>. This doesn't change the t-value.</p>
+
+<div class="interactive-zone">
+<h4>🔧 Rescaling Explorer</h4>
+<p>β̂₁ for g2earn = 0.0011333 miles per dollar. Choose a rescaling factor:</p>
+<div class="slider-group"><label>Rescale factor (i): <span id="rsV2">$1,000</span></label><input type="range" min="1" max="5" value="1" id="rsS2" oninput="updRS2()"></div>
+<div class="computed-result" id="rsR2"></div>
+</div>
+
+<h3>Standardized Slope</h3>
+<div class="formula-block">Standardized β̂₁ = (σ̂<sub>X</sub> / σ̂<sub>Y</sub>) × β̂₁<br><small style="color:var(--text-dim)">In bivariate regression, the standardized slope = Pearson r</small></div>
+
+<h3>Effect Size Benchmarks</h3>
+<table class="data-table"><thead><tr><th>Cohen's r</th><th>Interpretation</th></tr></thead>
+<tbody><tr><td>~0.10</td><td>Small effect</td></tr><tr><td>~0.30</td><td>Medium effect</td></tr><tr><td>~0.50</td><td>Large effect</td></tr></tbody></table>
+
+<div class="card card-warn"><span class="card-label yellow">The Key Insight</span>
+<p style="margin:0">Statistical significance and substantive significance are <strong>different questions</strong>. With n = 6,350 and r = 0.065, the result is highly significant (p < .001) but the effect is tiny by any standard. <strong>A strong student discusses both dimensions.</strong></p></div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 4</span>
+<h4>✏️ β̂₁ = 0.0011333. Rescaled to $10,000 units: i × β̂₁ = ?</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q1}_input" placeholder="Enter rescaled coefficient..." onkeydown="if(event.key==='Enter')checkText('${q1}')"></div>
+<button class="check-btn" onclick="checkText('${q1}')">Check Answer</button>
+<div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 4</span>
+<h4>✏️ Does rescaling change the t-value?</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,1)">A) Yes — larger coefficient = larger t</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,1)">B) No — both coefficient and SE get multiplied by the same factor, so t = β̂/SE is unchanged</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,1)">C) It depends on sample size</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 4</span>
+<h4>✏️ σ̂_X = 36475.81, σ̂_Y = 636.394, β̂₁ = 0.0011333. Calculate the standardized slope:</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q3}_input" placeholder="(σ_X / σ_Y) × β̂ = ..." onkeydown="if(event.key==='Enter')checkText('${q3}')"></div>
+<button class="check-btn" onclick="checkText('${q3}')">Check Answer</button>
+<div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 4</span>
+<h4>✍️ Write a one-sentence interpretation of g2earn rescaled to $10,000 (coefficient ≈ 11.33):</h4>
+<div class="text-input-group"><textarea class="text-input" id="${q4}_input" placeholder="For each additional $10,000..." rows="3"></textarea></div>
+<button class="check-btn" onclick="showSample('${q4}')">Compare to Model Answer</button>
+<div class="fb" id="${q4}_fb"></div></div>`;
+
+var steps=[1000,5000,10000,25000,50000],labs=['$1,000','$5,000','$10,000','$25,000','$50,000'];
+window.updRS2=function(){var i=+document.getElementById('rsS2').value-1,f=steps[i],r=(f*0.0011333).toFixed(2);
+document.getElementById('rsV2').textContent=labs[i];
+document.getElementById('rsR2').innerHTML=f.toLocaleString()+' × 0.0011333 = <span class="val2">'+r+' miles</span> &nbsp; | &nbsp; t-value = <span class="val">5.19 (unchanged)</span>'};
+setTimeout(updRS2,50);
+
+window['ck_'+q1]=function(v){var n=parseFloat(v);return n>=11.3&&n<=11.4};
+document.getElementById(q1).setAttribute('data-checker','ck_'+q1);
+document.getElementById(q1).setAttribute('data-cfb',encodeURIComponent(' 10,000 × 0.0011333 = <strong>11.333 miles</strong>. "Each additional $10,000 in earnings is associated with living about 11 miles farther from mother." Now the magnitude is tangible.'));
+document.getElementById(q1).setAttribute('data-ifb',encodeURIComponent(' i × β̂₁ = 10,000 × 0.0011333 = <strong>11.333</strong>. Multiply the coefficient by the rescaling factor.'));
+attachFB(q2,' t = β̂₁/SE. Rescaling multiplies <em>both</em> β̂₁ and SE by the same factor i, so the ratio doesn\'t change. Statistical significance is <strong>invariant to units of measurement</strong>. (See Box 5.6.)',' Both numerator and denominator get scaled by i → t is <strong>unchanged</strong>. Significance doesn\'t depend on units.');
+window['ck_'+q3]=function(v){var n=parseFloat(v);return n>=0.064&&n<=0.066};
+document.getElementById(q3).setAttribute('data-checker','ck_'+q3);
+document.getElementById(q3).setAttribute('data-cfb',encodeURIComponent(' (36475.81/636.394) × 0.0011333 = 57.32 × 0.0011333 = <strong>0.0650</strong>. This equals the Pearson correlation r = 0.065 (Display 5.7). By Cohen\'s standards, this is well below "small" (0.10).'));
+document.getElementById(q3).setAttribute('data-ifb',encodeURIComponent(' (σ_X/σ_Y) × β̂₁ = (36475.81/636.394) × 0.0011333 = <strong>0.065</strong>. In bivariate regression, this always equals the Pearson r.'));
+attachSample(q4,' "For each additional $10,000 in annual earnings, the distance the adult lives from their mother is expected to increase by approximately 11 miles, on average."');
+}},
+
+// ── 8: REGRESSION ASYMMETRY ──
+{id:'asymmetry',title:'8. Regression Asymmetry',subtitle:'Why regressing Y on X ≠ X on Y',render(el){
+const q1=uid(),q2=uid(),q3=uid();
+el.innerHTML=`<h2 class="module-title">The Asymmetric Nature of Regression</h2>
+<p class="module-subtitle">Module 8 · Why the order of variables matters</p>
+
+<h3>Swapping Y and X Changes the Slope</h3>
+<p>Regression is <span class="hl">asymmetric</span>: regressing Y on X gives a <em>different</em> slope than regressing X on Y.</p>
+<table class="data-table"><thead><tr><th></th><th>Distance on Earnings</th><th>Earnings on Distance</th></tr></thead>
+<tbody>
+<tr><td><strong>Slope</strong></td><td>0.00113</td><td>3.72</td></tr>
+<tr><td><strong>t-value</strong></td><td>5.19</td><td>5.19 (same!)</td></tr>
+<tr><td><strong>r</strong></td><td>0.065</td><td>0.065 (same!)</td></tr>
+<tr><td><strong>Standardized slope</strong></td><td>0.065</td><td>0.065 (same!)</td></tr>
+</tbody></table>
+<p>The slopes differ because each divides the covariance by a <em>different</em> variance: Var(X) vs. Var(Y). But the <strong>t-value, correlation, and standardized slope</strong> are all the same regardless of ordering.</p>
+
+<div class="card card-success"><span class="card-label green">Key Takeaway</span>
+<p style="margin:0"><strong>Theory determines which variable is Y and which is X</strong> — the regression model can't tell you. The equation is inherently directional (Y on the left), but that directionality is imposed by the researcher, not by the math.</p></div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 3</span>
+<h4>✏️ When you reverse predictor and outcome, which value stays the same?</h4>
+<div id="${q1}_opts">
+<button class="option-btn" onclick="checkMCQ('${q1}',0,2)">A) The unstandardized slope</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',1,2)">B) The intercept</button>
+<button class="option-btn" onclick="checkMCQ('${q1}',2,2)">C) The t-value and the Pearson correlation</button>
+</div><div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 3</span>
+<h4>✏️ Under what condition would the slopes from Y-on-X and X-on-Y be identical?</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,0)">A) When σ_X = σ_Y (both variables have the same standard deviation)</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,0)">B) When the sample size is large enough</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,0)">C) Never — they are always different</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 3</span>
+<h4>✏️ Why can't OLS tell you which variable should be Y and which should be X?</h4>
+<div id="${q3}_opts">
+<button class="option-btn" onclick="checkMCQ('${q3}',0,1)">A) OLS only works in one direction.</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',1,1)">B) Because regression models association, not causation. Theory and research design determine which variable is the outcome — the math can estimate the relationship in either direction.</button>
+<button class="option-btn" onclick="checkMCQ('${q3}',2,1)">C) The slope is the same either way.</button>
+</div><div class="fb" id="${q3}_fb"></div></div>`;
+
+attachFB(q1,' The <strong>t-value and Pearson r</strong> are symmetric — they measure the strength of the linear association regardless of which variable is labeled X or Y. The unstandardized slope and intercept both change when you swap.',' The t-value and correlation <strong>stay the same</strong>. The slope and intercept change because they depend on which variable\'s variance is in the denominator.');
+attachFB(q2,' Slope(Y on X) = Cov(X,Y)/Var(X). Slope(X on Y) = Cov(X,Y)/Var(Y). These are equal only when Var(X) = Var(Y), i.e., <strong>σ_X = σ_Y</strong>. This condition also means both slopes equal r.',' When σ_X = σ_Y, both variance denominators are equal, so both slopes = Cov(X,Y)/Var(X) = Cov(X,Y)/Var(Y). Both also equal the Pearson r.');
+attachFB(q3,' Regression captures association. Theory tells you which variable should be on the left-hand side (outcome) vs. right-hand side (predictor). This is why Gordon emphasizes the "left-hand side" / "right-hand side" distinction throughout the textbook.',' Regression models <strong>association</strong>. The choice of Y and X must come from theory and research design, not from the statistical model itself.');
+}},
+
+// ── 9: READING STATA OUTPUT ──
+{id:'stata',title:'9. Reading Stata Output',subtitle:'Every piece of Display 5.1 explained',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid();
+el.innerHTML=`<h2 class="module-title">Reading Stata Output</h2>
+<p class="module-subtitle">Module 9 · Dissecting Display 5.1 from Gordon</p>
+
+<div class="stata-block" style="font-size:12px;line-height:2">regress g1miles g2earn
+
+    Source |       SS           df       MS         Number of obs =   6,350
+-------------+------------------------------         F(1, 6348)    =   26.90
+       Model |  10850282.2         1  10850282.2     Prob > F      =  0.0000
+    Residual |  2.5605e+09      6348  403351.876     R-squared     =  0.0042
+-------------+------------------------------         Adj R-squared =  0.0041
+       Total |  2.5713e+09      6349  404997.321     Root MSE      =   635.1
+
+     g1miles |   Coef.    Std. Err.     t     P>|t|   [95% Conf. Interval]
+  -----------+------------------------------------------------------------
+      g2earn |  .0011333   .0002185    5.19   0.000    .000705   .0015617
+       _cons | 249.8116   10.27798   24.31   0.000   229.6632   269.9599</div>
+
+<h3>Element-by-Element Guide</h3>
+<table class="data-table"><thead><tr><th>Element</th><th>Value</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Number of obs</strong></td><td>6,350</td><td>Sample size (n)</td></tr>
+<tr><td><strong>F(1, 6348)</strong></td><td>26.90</td><td>Model F-test (= t² in bivariate: 5.19² ≈ 26.9)</td></tr>
+<tr><td><strong>R-squared</strong></td><td>0.0042</td><td>0.42% of variation in distance explained by earnings</td></tr>
+<tr><td><strong>Root MSE</strong></td><td>635.1</td><td>σ̂ = √(Residual MS) = √403351.876</td></tr>
+<tr><td><strong>Coef. (g2earn)</strong></td><td>0.0011333</td><td>Slope: miles per dollar</td></tr>
+<tr><td><strong>Coef. (_cons)</strong></td><td>249.8116</td><td>Intercept: predicted distance when earnings = 0</td></tr>
+<tr><td><strong>t</strong></td><td>5.19</td><td>= Coef/Std.Err = 0.0011333/0.0002185</td></tr>
+<tr><td><strong>P>|t|</strong></td><td>0.000</td><td>Two-sided p-value (< 0.001)</td></tr>
+</tbody></table>
+
+<div class="card card-accent"><span class="card-label blue">Key Relationships to Verify</span>
+<p>• <strong>t = Coef / Std.Err:</strong> 0.0011333 / 0.0002185 = 5.19 ✓</p>
+<p>• <strong>F = t²</strong> (bivariate): 5.19² ≈ 26.9 ✓</p>
+<p>• <strong>Root MSE = √(Residual MS):</strong> √403,351.876 ≈ 635.1 ✓</p>
+<p style="margin:0">• <strong>R² = Model SS / Total SS:</strong> 10,850,282 / 2,571,300,000 = 0.0042 ✓</p></div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 4</span>
+<h4>✏️ Verify R² by hand: 1 − (Residual SS / Total SS):</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q1}_input" placeholder="R² = ..." onkeydown="if(event.key==='Enter')checkText('${q1}')"></div>
+<button class="check-btn" onclick="checkText('${q1}')">Check Answer</button>
+<div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 4</span>
+<h4>✏️ In bivariate regression, the model F-statistic relates to the t-statistic by:</h4>
+<div id="${q2}_opts">
+<button class="option-btn" onclick="checkMCQ('${q2}',0,0)">A) F = t² (26.90 ≈ 5.19²), because the model F-test and the slope t-test ask the same question when there's one predictor</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',1,0)">B) F = t (they're always equal)</button>
+<button class="option-btn" onclick="checkMCQ('${q2}',2,0)">C) No relationship exists</button>
+</div><div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 4</span>
+<h4>✍️ Write a full interpretation of the g2earn coefficient (0.0011333) as it appears in this output:</h4>
+<div class="text-input-group"><textarea class="text-input" id="${q3}_input" placeholder="For each additional dollar..." rows="3"></textarea></div>
+<button class="check-btn" onclick="showSample('${q3}')">Compare to Model Answer</button>
+<div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 4</span>
+<h4>✏️ Is the intercept (249.81) substantively meaningful here?</h4>
+<div id="${q4}_opts">
+<button class="option-btn" onclick="checkMCQ('${q4}',0,1)">A) No — you can't have zero earnings.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',1,1)">B) Yes, with nuance — zero earnings IS a valid value (some adults earn nothing), so the intercept means "adults with no earnings are estimated to live about 250 miles from their mothers." But whether this extrapolation is sensible requires judgment.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',2,1)">C) Always meaningful — Stata reports a significant test.</button>
+</div><div class="fb" id="${q4}_fb"></div></div>`;
+
+window['ck_'+q1]=function(v){var n=parseFloat(v);return(n>=0.004&&n<=0.005)||v==='0.0042'||v==='.0042'};
+document.getElementById(q1).setAttribute('data-checker','ck_'+q1);
+document.getElementById(q1).setAttribute('data-cfb',encodeURIComponent(' 1 − (2.5605e9 / 2.5713e9) = 1 − 0.9958 = <strong>0.0042</strong> ✓ Matches the output. Only 0.42% of the variation in distance is explained by earnings.'));
+document.getElementById(q1).setAttribute('data-ifb',encodeURIComponent(' R² = 1 − SSE/TSS = 1 − (Residual/Total) = 1 − (2,560,500,000/2,571,300,000) = <strong>0.0042</strong>.'));
+attachFB(q2,' F = t² when there\'s exactly <strong>1 numerator df</strong>. In bivariate regression, the model F (testing "is the slope ≠ 0?") and the t-test (testing "is this slope ≠ 0?") are the same question. Check: 5.19² = 26.93 ≈ 26.90. <strong>This breaks in multiple regression with p > 1 predictors.</strong>',' <strong>F = t²</strong> in bivariate regression. Both tests ask the same question: "is the one slope ≠ 0?" This equivalence only holds with 1 numerator df.');
+attachSample(q3,' "For each additional dollar in annual earnings, the adult is expected to live 0.0011 miles farther from their mother, on average. Given the very small per-dollar magnitude, rescaling to $10,000 units (coefficient ≈ 11.3 miles) makes the substantive size clearer."');
+attachFB(q4,' This requires nuanced judgment — exactly what Professor Brewster tests. Zero earnings IS possible (some adults are unemployed or in school), so the intercept isn\'t completely meaningless. But the statistical test of H₀: β₀ = 0 may not be substantively interesting since zero is not a plausible Y-value boundary.',' The key question: is X = 0 plausible? Zero earnings is possible for some adults. Whether the intercept test is <em>substantively interesting</em> requires judgment about the research context.');
+}},
+
+// ── 10: FINAL REVIEW LAB ──
+{id:'review',title:'10. Final Review Lab',subtitle:'Apply everything to fresh output',render(el){
+const q1=uid(),q2=uid(),q3=uid(),q4=uid(),q5=uid(),q6=uid();
+el.innerHTML=`<h2 class="module-title">Final Interactive Review Lab</h2>
+<p class="module-subtitle">Synthesize all modules with fresh Stata output</p>
+
+<div class="stata-block" style="font-size:12px;line-height:2">regress BodyMassSC BodyMassSA
+
+    Source |       SS           df       MS         Number of obs =   7,885
+-------------+------------------------------         F(1, 7883)    =  784.52
+       Model |  14208.312         1  14208.312       Prob > F      =  0.0000
+    Residual |  142790.62      7883  18.113476       R-squared     =  0.0905
+-------------+------------------------------         Adj R-squared =  0.0904
+       Total |  156998.93      7884  19.916398       Root MSE      =  4.2560
+
+  BodyMassSC |   Coef.    Std. Err.     t     P>|t|   [95% Conf. Interval]
+  -----------+------------------------------------------------------------
+  BodyMassSA |  .18941     .00676    28.01   0.000    .17616      .20267
+       _cons | 15.2504     .18328   83.19   0.000    14.8911     15.6097</div>
+
+<div class="q-block" id="${q1}"><span class="q-num">Q1 of 6 · Interpretation</span>
+<h4>✍️ Write a proper interpretation of the BodyMassSA coefficient (0.189):</h4>
+<div class="text-input-group"><textarea class="text-input" id="${q1}_input" placeholder="For each additional unit..." rows="3"></textarea></div>
+<button class="check-btn" onclick="showSample('${q1}')">Compare to Model Answer</button>
+<div class="fb" id="${q1}_fb"></div></div>
+
+<div class="q-block" id="${q2}"><span class="q-num">Q2 of 6 · Verify t</span>
+<h4>✏️ Verify the t-statistic by hand: Coef / Std.Err = ?</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q2}_input" placeholder="t = ..." onkeydown="if(event.key==='Enter')checkText('${q2}')"></div>
+<button class="check-btn" onclick="checkText('${q2}')">Check Answer</button>
+<div class="fb" id="${q2}_fb"></div></div>
+
+<div class="q-block" id="${q3}"><span class="q-num">Q3 of 6 · Verify F = t²</span>
+<h4>✏️ Confirm the relationship F = t²:</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q3}_input" placeholder="28.01² = ..." onkeydown="if(event.key==='Enter')checkText('${q3}')"></div>
+<button class="check-btn" onclick="checkText('${q3}')">Check Answer</button>
+<div class="fb" id="${q3}_fb"></div></div>
+
+<div class="q-block" id="${q4}"><span class="q-num">Q4 of 6 · Root MSE Diagnosis</span>
+<h4>✏️ Root MSE = 4.256 and Unconditional SD = √19.916 ≈ 4.463. What does this comparison tell us?</h4>
+<div id="${q4}_opts">
+<button class="option-btn" onclick="checkMCQ('${q4}',0,1)">A) The model perfectly predicts child body mass.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',1,1)">B) The conditional SD (4.256) is only slightly smaller than the unconditional SD (4.463), so adult body mass explains a modest amount of variation — consistent with R² = 0.09.</button>
+<button class="option-btn" onclick="checkMCQ('${q4}',2,1)">C) These numbers can't be compared.</button>
+</div><div class="fb" id="${q4}_fb"></div></div>
+
+<div class="q-block" id="${q5}"><span class="q-num">Q5 of 6 · Intercept Meaning</span>
+<h4>✏️ Is the intercept (15.25) substantively meaningful?</h4>
+<div id="${q5}_opts">
+<button class="option-btn" onclick="checkMCQ('${q5}',0,1)">A) Yes — all body mass intercepts are meaningful.</button>
+<button class="option-btn" onclick="checkMCQ('${q5}',1,1)">B) No — adult body mass of zero is biologically impossible, so the intercept is a mathematical anchor but lacks real-world meaning.</button>
+<button class="option-btn" onclick="checkMCQ('${q5}',2,1)">C) It's meaningful because it's statistically significant.</button>
+</div><div class="fb" id="${q5}_fb"></div></div>
+
+<div class="q-block" id="${q6}"><span class="q-num">Q6 of 6 · Synthesis</span>
+<h4>✏️ The Pearson correlation between BodyMassSC and BodyMassSA is:</h4>
+<div class="text-input-group"><input type="text" class="text-input" id="${q6}_input" placeholder="r = √R² = ..." onkeydown="if(event.key==='Enter')checkText('${q6}')"></div>
+<button class="check-btn" onclick="checkText('${q6}')">Check Answer</button>
+<div class="fb" id="${q6}_fb"></div>
+<div class="expandable" style="margin-top:16px">
+<button class="expand-trigger" onclick="toggleExpand(this)"><span class="arrow">▶</span> Why does this work?</button>
+<div class="expand-content"><p>In bivariate regression, R² = r². So r = √R² = √0.0905 ≈ 0.301. The sign is positive (matching the positive slope). By Cohen's standards, r ≈ 0.30 is a medium-sized effect — notably larger than the distance/earnings example (r = 0.065).</p></div>
+</div></div>
+
+<div class="card card-success" style="margin-top:32px"><span class="card-label green">🎉 Lab Complete!</span>
+<p>You've worked through all 10 modules of the Bivariate Regression Learning Lab. The skills that matter most for exams:</p>
+<p>1. <strong>Slope interpretation</strong> with all four elements (direction, magnitude, variables, "on average")</p>
+<p>2. <strong>Hypothesis testing</strong> including one-sided p-value conversion</p>
+<p>3. <strong>CI ↔ test equivalence</strong> — zero inside CI ↔ fail to reject</p>
+<p>4. <strong>Rescaling</strong> doesn't change t-values; standardized slope = r in bivariate</p>
+<p style="margin:0">5. <strong>Statistical ≠ substantive significance</strong> — always assess both</p>
+</div>`;
+
+attachSample(q1,' "For each additional unit of adult body mass, the child\'s body mass is expected to increase by about 0.19 units, on average."');
+window['ck_'+q2]=function(v){var n=parseFloat(v);return n>=28.0&&n<=28.1};
+document.getElementById(q2).setAttribute('data-checker','ck_'+q2);
+document.getElementById(q2).setAttribute('data-cfb',encodeURIComponent(' t = 0.18941 / 0.00676 = <strong>28.01</strong> ✓ Matches the output perfectly.'));
+document.getElementById(q2).setAttribute('data-ifb',encodeURIComponent(' t = Coef / Std.Err = 0.18941 / 0.00676 = <strong>28.01</strong>.'));
+window['ck_'+q3]=function(v){var n=parseFloat(v);return n>=784&&n<=785};
+document.getElementById(q3).setAttribute('data-checker','ck_'+q3);
+document.getElementById(q3).setAttribute('data-cfb',encodeURIComponent(' 28.01² = <strong>784.56</strong> ≈ 784.52 (matching F from the output within rounding). F = t² confirmed.'));
+document.getElementById(q3).setAttribute('data-ifb',encodeURIComponent(' 28.01 × 28.01 = <strong>784.56</strong> ≈ 784.52. The small difference is rounding.'));
+attachFB(q4,' When σ̂ (4.256) is only slightly less than σ̂_Y (4.463), the predictor reduces variability modestly. This aligns with R² = 0.09 — about 9% explained. Compared to the earnings/distance example (R² = 0.004), this is a notably stronger relationship.',' σ̂ < σ̂_Y means X <em>does</em> help explain Y, but only modestly (4.256 vs. 4.463). The ~9% R² confirms moderate explanatory power.');
+attachFB(q5,' Adult body mass of zero is <strong>biologically impossible</strong>. The intercept is mathematically necessary but not a meaningful prediction. This is exactly the reasoning Gordon develops in Section 5.4.8. Statistical significance doesn\'t make it substantively meaningful.',' Zero body mass is impossible → intercept is <strong>not substantively meaningful</strong>, regardless of its statistical significance.');
+window['ck_'+q6]=function(v){var n=parseFloat(v);return n>=0.29&&n<=0.31};
+document.getElementById(q6).setAttribute('data-checker','ck_'+q6);
+document.getElementById(q6).setAttribute('data-cfb',encodeURIComponent(' r = √0.0905 = <strong>0.301</strong> (positive because the slope is positive). By Cohen\'s benchmarks, this is a <em>medium</em> effect — substantially larger than the distance/earnings example.'));
+document.getElementById(q6).setAttribute('data-ifb',encodeURIComponent(' In bivariate regression, r = √R² = √0.0905 = <strong>0.301</strong>. The sign matches the slope direction.'));
+}}
+
+]; // END MODULES
+
+// ═══════════════════════════════════════════
+// NAV & RENDERING (identical to Ch6 framework)
+// ═══════════════════════════════════════════
+function buildNav(){document.getElementById('navList').innerHTML=MODULES.map(function(m,i){return '<div class="nav-item '+(i===currentModule?'active':'')+' '+(completed.has(i)?'completed':'')+'" onclick="goTo('+i+')"><span class="nav-dot"></span><span>'+m.title+'</span></div>'}).join('')}
+function goTo(idx){if(idx>=0&&idx<MODULES.length){if(currentModule!==idx)completed.add(currentModule);currentModule=idx;qCounter=0;renderModule();buildNav();updateProgress();saveProgress();window.scrollTo({top:0,behavior:'smooth'});document.getElementById('sidebar').classList.remove('open')}}
+function renderModule(){var c=document.getElementById('moduleContainer');c.innerHTML='';c.className='module-container fade-in';var el=document.createElement('div');c.appendChild(el);MODULES[currentModule].render(el);var nav=document.createElement('div');nav.className='module-nav';nav.innerHTML=(currentModule>0?'<button class="btn btn-secondary" onclick="goTo('+(currentModule-1)+')">← Previous</button>':'<span></span>')+(currentModule<MODULES.length-1?'<button class="btn btn-primary" onclick="goTo('+(currentModule+1)+')">Next Module →</button>':'<span></span>');el.appendChild(nav)}
+function updateProgress(){var pct=Math.round((completed.size/MODULES.length)*100);document.getElementById('progressPct').textContent=pct+'%';document.getElementById('progressFill').style.width=pct+'%';var mp=document.getElementById('mobileProgress');if(mp)mp.textContent=pct+'%';document.getElementById('statsVisited').textContent=completed.size+'/'+MODULES.length;document.getElementById('statsAnswered').textContent=totalAnswered}
+function toggleExpand(t){t.classList.toggle('open');t.nextElementSibling.classList.toggle('open')}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+window.addEventListener('beforeunload',function(){completed.add(currentModule);saveProgress()});
+
+// INIT
+var resumed=loadProgress();buildNav();renderModule();updateProgress();
+if(resumed&&completed.size>0){var t=document.createElement('div');t.style.cssText='position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--accent);border-radius:12px;padding:16px 20px;z-index:500;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px;animation:fadeIn .4s';t.innerHTML='<div style="color:var(--accent);font-weight:600;margin-bottom:4px">Welcome back!</div><div style="color:var(--text-dim)">Resuming at <strong style="color:var(--text)">'+MODULES[currentModule].title+'</strong> · '+totalAnswered+' questions answered</div><button onclick="this.parentElement.remove()" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text-dim);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:\'DM Sans\'">Dismiss</button>';document.body.appendChild(t);setTimeout(function(){if(t.parentElement)t.remove()},6000)}
+</script>
+</body>
+</html>
