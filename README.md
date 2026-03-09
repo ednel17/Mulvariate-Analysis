@@ -1,38 +1,32 @@
 <div align="center">
 
-# 📊 Multivariate Analysis Study Resources
+<h1>📊 Multivariate Analysis Study Resources</h1>
 
-**SYA 5406 · Spring 2026 · Florida State University**
+<p><b>SYA 5406 · Spring 2026 · Florida State University</b></p>
 
-Interactive study guides, learning labs, and practice exams for OLS regression — built for students, by a student.
+<p>Interactive study guides, learning labs, and practice exams for OLS regression — built for students, by a student.</p>
 
----
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🌐_Open_Study_Site-4a9eff?style=for-the-badge">
-  <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🌐_Open_Study_Site-141720?style=for-the-badge">
-  <img alt="Open Study Site" src="https://img.shields.io/badge/🌐_Open_Study_Site-141720?style=for-the-badge">
-</picture>
-
-&nbsp;
+<br>
 
 <a href="https://ednel17.github.io/Multivariate-Analysis">
-
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🌐_Open_Study_Site-4a9eff?style=for-the-badge">
+    <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🌐_Open_Study_Site-141720?style=for-the-badge">
+    <img alt="Open Study Site" src="https://img.shields.io/badge/🌐_Open_Study_Site-141720?style=for-the-badge">
+  </picture>
+</a>
+&nbsp;
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/💡_No_Install_Needed-3d4663?style=for-the-badge">
   <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/💡_No_Install_Needed-1e2230?style=for-the-badge">
   <img alt="No Install Needed" src="https://img.shields.io/badge/💡_No_Install_Needed-1e2230?style=for-the-badge">
 </picture>
-
 &nbsp;
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🆓_Free_Forever-3d4663?style=for-the-badge">
   <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🆓_Free_Forever-1e2230?style=for-the-badge">
   <img alt="Free Forever" src="https://img.shields.io/badge/🆓_Free_Forever-1e2230?style=for-the-badge">
 </picture>
-
-</a>
 
 </div>
 
@@ -131,10 +125,10 @@ These resources teach **concepts and methods** — they don't provide answers to
 
 <div align="center">
 
-Built with Claude AI · Hosted on GitHub Pages
+<p>Built with Claude AI · Hosted on GitHub Pages</p>
 
-**Last updated:** March 2026
+<p><b>Last updated:</b> March 2026</p>
 
-[ednel17.github.io/Multivariate-Analysis](https://ednel17.github.io/Multivariate-Analysis)
+<p><a href="https://ednel17.github.io/Multivariate-Analysis">ednel17.github.io/Multivariate-Analysis</a></p>
 
 </div>
