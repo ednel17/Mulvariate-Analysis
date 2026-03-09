@@ -81,33 +81,6 @@ Every module follows the same learn-first structure:
 
 ---
 
-## Features
-
-- 🖥️ **Live Stata output** — learn to read real regression tables, not just memorize definitions
-- 🎚️ **Interactive sliders** — adjust intercepts, slopes, standard errors, and correlations in real time
-- 📱 **Mobile-friendly** — responsive sidebar collapses on phone/tablet for studying anywhere
-- 🧠 **Teach-first design** — every concept is explained before you're tested on it
-- 📊 **Progress tracking** — sidebar shows modules completed and questions answered
-- 🔄 **Retry everything** — no penalties, no lockouts — practice until it clicks
-
----
-
-## Quick Start
-
-**Option A — Use online (recommended)**
-
-Visit **[ednel17.github.io/Multivariate-Analysis](https://ednel17.github.io/Multivariate-Analysis)** and click any module.
-
-**Option B — Download for offline use**
-
-1. Click the green **Code** button above → **Download ZIP**
-2. Unzip the folder
-3. Open any `.html` file in your browser
-
-Each file is fully self-contained — no internet connection required after download.
-
----
-
 ## Coming Soon
 
 - [ ] Chapter 8–11 learning labs
