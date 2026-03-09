@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch 7: Dummy Variables — Chapter Exam</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0c0e14;--surface:#14171f;--surface2:#1a1e28;--surface3:#222737;--border:#2c3148;--text:#dfe1e8;--dim:#7d8299;--bright:#fff;--accent:#7ba4f7;--accent2:#56c7b9;--accent3:#f76e8a;--success:#56c7b9;--warn:#f5c842;--error:#f76e8a;--code:#111420;--r:10px;--rs:7px;--font:'DM Sans',system-ui,sans-serif;--serif:'Source Serif 4',Georgia,serif;--mono:'JetBrains Mono','Consolas',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.app{max-width:860px;margin:0 auto;padding:20px 24px 100px}
+
+/* HEADER */
+.exam-header{text-align:center;padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.exam-header h1{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--bright)}
+.exam-header p{font-size:13px;color:var(--dim);margin-top:4px}
+.exam-meta{display:flex;justify-content:center;gap:24px;margin-top:16px;flex-wrap:wrap}
+.meta-pill{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);color:var(--dim);background:var(--surface)}
+.meta-pill b{color:var(--accent)}
+
+/* PROGRESS BAR */
+.progress-strip{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 0;margin:0 -24px;padding-left:24px;padding-right:24px}
+.progress-row{display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s}
+.progress-text{font-size:12px;color:var(--dim);font-weight:600;white-space:nowrap;min-width:80px;text-align:right}
+.score-text{font-size:12px;color:var(--accent2);font-weight:600;white-space:nowrap}
+
+/* NAV */
+.q-nav{display:flex;gap:4px;flex-wrap:wrap;margin:16px 0 8px;padding:12px 0;border-bottom:1px solid var(--border)}
+.q-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--dim);transition:all .2s}
+.q-dot:hover{border-color:var(--accent);color:var(--text)}
+.q-dot.active{border-color:var(--accent);background:var(--accent);color:#0c0e14}
+.q-dot.correct{border-color:var(--success);background:rgba(86,199,185,.15);color:var(--success)}
+.q-dot.wrong{border-color:var(--error);background:rgba(247,110,138,.12);color:var(--error)}
+.q-dot.answered{border-color:var(--dim);background:var(--surface2);color:var(--dim)}
+
+/* QUESTION CARD */
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;margin:16px 0;display:none}
+.q-card.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.q-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:3px 10px;border-radius:12px;border:1px solid var(--border)}
+.q-badge.mc{color:var(--accent);border-color:rgba(123,164,247,.3)}
+.q-badge.fill{color:var(--accent2);border-color:rgba(86,199,185,.3)}
+.q-badge.written{color:var(--warn);border-color:rgba(245,200,66,.3)}
+.q-badge.match{color:var(--accent3);border-color:rgba(247,110,138,.3)}
+.q-badge.stata{color:#c792ea;border-color:rgba(199,146,234,.3)}
+.q-badge.scenario{color:#82aaff;border-color:rgba(130,170,255,.3)}
+.q-badge.output{color:#f78c6c;border-color:rgba(247,140,108,.3)}
+.q-counter{font-size:12px;color:var(--dim)}
+.q-text{font-size:16px;line-height:1.7;margin-bottom:20px}
+.q-text strong{color:var(--bright)}
+
+/* OPTIONS */
+.opt-btn{display:block;width:100%;text-align:left;padding:13px 18px;margin:7px 0;border-radius:var(--rs);background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-size:14px;cursor:pointer;transition:all .15s;font-family:var(--font);line-height:1.6}
+.opt-btn:hover:not(.locked){border-color:var(--accent);background:var(--surface3)}
+.opt-btn.sel{border-color:var(--accent);background:rgba(123,164,247,.08)}
+.opt-btn.correct-show{border-color:var(--success);background:rgba(86,199,185,.1);color:var(--success)}
+.opt-btn.wrong-show{border-color:var(--error);background:rgba(247,110,138,.08);color:var(--error);opacity:.6}
+.opt-btn.locked{pointer-events:none}
+.opt-btn .opt-letter{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--surface3);text-align:center;line-height:24px;font-size:11px;font-weight:700;margin-right:10px;color:var(--dim)}
+.opt-btn.correct-show .opt-letter{background:var(--success);color:#0c0e14}
+.opt-btn.wrong-show .opt-letter{background:var(--error);color:#fff}
+
+/* TEXT INPUT */
+.fill-input{width:100%;padding:12px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:15px;font-family:var(--font);outline:none;transition:border-color .2s}
+.fill-input:focus{border-color:var(--accent)}
+.fill-input.ok{border-color:var(--success);background:rgba(86,199,185,.05)}
+.fill-input.bad{border-color:var(--error);background:rgba(247,110,138,.05)}
+.fill-input:read-only{opacity:.8}
+textarea.fill-input{min-height:90px;resize:vertical;line-height:1.6}
+
+/* MATCHING */
+.match-zone{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.match-item{padding:10px 14px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);font-size:13px;cursor:pointer;transition:all .15s;line-height:1.5}
+.match-item:hover{border-color:var(--accent)}
+.match-item.m-selected{border-color:var(--accent);background:rgba(123,164,247,.1);color:var(--accent)}
+.match-item.m-matched{border-color:var(--success);background:rgba(86,199,185,.08);color:var(--success);pointer-events:none}
+.match-item.m-wrong{border-color:var(--error);background:rgba(247,110,138,.08)}
+.match-left{border-left:3px solid var(--accent)}
+.match-right{border-left:3px solid var(--accent3)}
+.match-right.m-matched{border-left-color:var(--success)}
+
+/* CODE BLOCK */
+.code-block{background:var(--code);border:1px solid var(--border);border-radius:var(--rs);padding:16px 20px;font-family:var(--mono);font-size:13px;color:var(--text);line-height:1.9;margin:12px 0;overflow-x:auto;white-space:pre-wrap}
+.code-block .kw{color:var(--accent)}.code-block .cm{color:#5a6078;font-style:italic}.code-block .vr{color:var(--accent2)}.code-block .nu{color:var(--warn)}
+
+/* FEEDBACK */
+.fb-box{padding:16px 20px;border-radius:var(--rs);margin-top:16px;font-size:14px;line-height:1.65;display:none}
+.fb-box.show{display:block;animation:fadeUp .25s ease}
+.fb-ok{background:rgba(86,199,185,.07);border:1px solid rgba(86,199,185,.25);color:var(--success)}
+.fb-no{background:rgba(247,110,138,.07);border:1px solid rgba(247,110,138,.25);color:#ffa0a0}
+.fb-box b{display:block;margin-bottom:4px}
+.fb-sample{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);color:var(--warn)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:var(--font)}
+.btn-primary{background:var(--accent);color:#0c0e14}.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--accent);color:var(--text)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-check{background:var(--accent);color:#0c0e14;margin-top:10px}
+.btn-check:hover{filter:brightness(1.1)}
+.q-actions{display:flex;justify-content:space-between;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* RESULTS SCREEN */
+.results-screen{display:none;text-align:center;padding:40px 0}
+.results-screen.show{display:block;animation:fadeUp .5s ease}
+.results-score{font-family:var(--serif);font-size:64px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:16px 0 8px}
+.results-pct{font-size:20px;color:var(--dim);margin-bottom:32px}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;text-align:left;margin:24px 0}
+.results-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px}
+.results-card .rc-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.results-card .rc-val{font-size:22px;font-weight:700;margin-top:4px}
+.results-card .rc-val.good{color:var(--success)}.results-card .rc-val.mid{color:var(--warn)}.results-card .rc-val.low{color:var(--error)}
+.struggle-list{text-align:left;margin:24px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.struggle-list h3{font-size:14px;color:var(--accent3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.struggle-item{font-size:14px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--text)}
+.struggle-item:last-child{border:none}
+
+/* RESET */
+.reset-area{text-align:center;margin-top:24px}
+.reset-btn{padding:8px 20px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--rs);color:var(--dim);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .2s}
+.reset-btn:hover{border-color:var(--error);color:var(--error)}
+
+/* DATA TABLE */
+.dt{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.dt th{text-align:left;padding:8px 10px;background:var(--surface3);color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:11px;border-bottom:1px solid var(--border)}
+.dt td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.dt .hl{color:var(--accent);font-weight:600}
+
+@media(max-width:640px){.app{padding:12px 14px 80px}.q-card{padding:20px}.exam-header h1{font-size:22px}.match-zone{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+// ═══════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════
+const SK='ch7_exam_v3';
+let state={cur:0,answers:{},scores:{},done:false};
+function save(){try{localStorage.setItem(SK,JSON.stringify(state))}catch(e){}}
+function load(){try{let s=localStorage.getItem(SK);if(s){state=JSON.parse(s);return true}}catch(e){}return false}
+function reset(){
+  let b=document.querySelector('.reset-btn');
+  if(!b)return;
+  if(!b.dataset.armed){b.dataset.armed='1';b.textContent='⚠ Click again to confirm';b.style.borderColor='var(--error)';b.style.color='var(--error)';setTimeout(()=>{if(b){delete b.dataset.armed;b.textContent='↻ Reset Exam';b.style.borderColor='';b.style.color=''}},3000);return}
+  localStorage.removeItem(SK);state={cur:0,answers:{},scores:{},done:false};render();
+}
+
+// ═══════════════════════════════════════
+// QUESTIONS
+// ═══════════════════════════════════════
+const Q=[
+// ─── MC: Concepts ───
+{id:0,type:'mc',cat:'Concepts',text:'Why can\'t a nominal variable like <strong>race</strong> (coded 1–5) be entered directly into a regression as a continuous predictor?',
+opts:['The sample size is too small for categorical predictors','The numeric codes are arbitrary labels — a "one-unit increase" has no meaningful interpretation','Nominal variables always have too many missing values','OLS can only handle two predictors at a time'],
+ans:1,
+ok:'The codes assigned to nominal categories are arbitrary. A slope for race would assume equal-spaced, ordered categories — nonsensical for unordered groups.',
+no:'The key issue: numeric codes for nominal variables are <strong>arbitrary labels</strong>. A "one-unit increase in race" has no substantive meaning.'},
+
+{id:1,type:'mc',cat:'Concepts',text:'What is the difference between a <strong>nominal</strong> and an <strong>ordinal</strong> variable?',
+opts:['Nominal variables are binary; ordinal variables have 3+ categories','Nominal categories have no inherent order or distance; ordinal categories have order but not necessarily equal spacing','Nominal variables are always insignificant','There is no difference — the terms are interchangeable'],
+ans:1,
+ok:'Nominal = no order, no distance (e.g., race, religion). Ordinal = order but unequal spacing (e.g., education level coded 1–7).',
+no:'Nominal: categories have <strong>no order</strong> (race, region). Ordinal: categories have <strong>order but not equal spacing</strong> (education levels).'},
+
+{id:2,type:'mc',cat:'Concepts',text:'A dummy variable is defined as:',
+opts:['Any variable with more than two categories','A binary (0/1) indicator that equals 1 for cases in a specific category and 0 for all others','A variable that has been log-transformed','The residual from a regression'],
+ans:1,
+ok:'A dummy (indicator) variable is a 0/1 binary variable indicating membership in one category of a nominal/ordinal variable.',
+no:'A dummy variable is a <strong>binary (0/1) indicator</strong>: 1 if the case belongs to the indicated category, 0 otherwise.'},
+
+{id:3,type:'fill',cat:'c−1 Rule',text:'A categorical variable has <strong>6</strong> categories. How many dummy variables should be included in the regression model?',
+answer:'5',checker:v=>v.trim()==='5',
+ok:'c − 1 = 6 − 1 = <strong>5</strong> dummies. The 6th category becomes the reference.',
+no:'c − 1 = 6 − 1 = <strong>5</strong>. One category must be excluded as the reference to avoid perfect multicollinearity.'},
+
+{id:4,type:'mc',cat:'c−1 Rule',text:'Why do we include only c − 1 dummy variables rather than all c?',
+opts:['To save degrees of freedom','Because the c-th dummy is a perfect linear function of the other c − 1 dummies (plus the constant), creating perfect multicollinearity','Because the excluded category is not part of the analysis','To make the output shorter'],
+ans:1,
+ok:'Since the dummies are mutually exclusive and exhaustive, any one dummy can be perfectly predicted from the rest. Including all c creates the "dummy variable trap."',
+no:'If you know a case is 0 on c − 1 dummies, it must be 1 on the last. This <strong>perfect linear dependence</strong> makes OLS estimation impossible.'},
+
+{id:5,type:'mc',cat:'Reference Category',text:'The group whose dummy variable is <strong>excluded</strong> from the regression is called the:',
+opts:['Control group','Reference category (also called omitted or excluded category)','Dependent variable','Confounding variable'],
+ans:1,
+ok:'The reference (omitted/excluded) category is the baseline for comparison. All dummy coefficients are interpreted relative to this group.',
+no:'The excluded group is the <strong>reference category</strong>. Every dummy coefficient measures the difference between an included group and this baseline.'},
+
+{id:6,type:'mc',cat:'Reference Category',text:'Which of the following is a good reason to choose a particular reference category?',
+opts:['It has the smallest sample size','It is the group you expect to differ from the most other groups based on theory, and/or it has a relatively large sample size','It should always be the first category alphabetically','The reference category doesn\'t matter at all'],
+ans:1,
+ok:'Choose based on substantive interest (which comparisons matter?) and practical considerations (larger groups produce smaller standard errors).',
+no:'Choose based on <strong>theory</strong> (which contrasts matter?) and <strong>sample size</strong> (larger reference groups keep SEs manageable).'},
+
+{id:7,type:'mc',cat:'Reference Category',text:'If you change the reference category in a dummy variable regression, which of the following changes?',
+opts:['R-squared','The model F-test','The individual coefficients and their interpretation','The total sum of squares'],
+ans:2,
+ok:'Changing the reference is a reparameterization. R², SSE, TSS, MSS, and the F-test are all unchanged. Only the individual coefficients and intercept change.',
+no:'Only the <strong>individual coefficients and intercept</strong> change. All overall model statistics (R², F-test, SSE, TSS) remain identical.'},
+
+// ─── SINGLE DUMMY ───
+{id:8,type:'mc',cat:'Single Dummy',text:'In the model Y = β₀ + β₁D + ε, where D = 1 for women and D = 0 for men, the intercept β₀ represents:',
+opts:['The mean of Y for women','The mean of Y for men (the reference category)','The difference in means between men and women','The overall sample mean'],
+ans:1,
+ok:'When D = 0 (men), E(Y) = β₀ + β₁(0) = β₀. The intercept is the conditional mean for the reference group.',
+no:'Substitute D = 0: E(Y|D=0) = β₀. The intercept equals the <strong>mean for the reference category</strong> (men).'},
+
+{id:9,type:'fill',cat:'Single Dummy',text:'Given Ŷ = 323.76 − 59.39 × <em>female</em>, what is the predicted distance from mother for <strong>women</strong>? (Round to 2 decimal places)',
+answer:'264.37',checker:v=>{let n=parseFloat(v);return n>=264.3&&n<=264.4},
+ok:'For women (female = 1): 323.76 + (−59.39)(1) = 323.76 − 59.39 = <strong>264.37 miles</strong>.',
+no:'Substitute female = 1: Ŷ = 323.76 + (−59.39)(1) = <strong>264.37</strong>.'},
+
+{id:10,type:'mc',cat:'Single Dummy',text:'If you re-estimate the model using <em>male</em> = 1 for men, 0 for women (instead of <em>female</em>), the coefficient will be:',
+opts:['Zero','The same value (−59.39)','The same magnitude but opposite sign (+59.39)','A completely different number'],
+ans:2,
+ok:'Switching which dummy is included flips the sign: women are now the reference, and men live 59.39 miles farther than women. Same gap, opposite direction.',
+no:'Switching the included dummy <strong>flips the sign</strong> but keeps the magnitude. The intercept also changes to the new reference group\'s mean.'},
+
+{id:11,type:'mc',cat:'Single Dummy',text:'A bivariate regression with one dummy predictor is mathematically equivalent to:',
+opts:['A chi-squared test','A two-sample t-test for the difference in group means','An ANOVA with 5 groups','A correlation test'],
+ans:1,
+ok:'Gordon demonstrates this in Display 7.5. The t-statistic, difference in means, and p-value are identical between the regression and the t-test.',
+no:'A single-dummy bivariate regression produces the <strong>same t-statistic, difference, and p-value</strong> as a two-sample t-test.'},
+
+{id:12,type:'written',cat:'Single Dummy',text:'Write a complete interpretation of the coefficient −59.39 from the model: Ŷ = 323.76 − 59.39 × <em>female</em> (where female = 1 for women, 0 for men, and Y = distance from mother in miles).',
+sample:'On average, adult women live approximately 59 miles closer to their mothers than do adult men. This difference is statistically significant (t = −3.35, p = .001).'},
+
+// ─── MULTI-CATEGORY ───
+{id:13,type:'fill',cat:'Multi-Category',text:'In the model Ŷ = 240.97 + 157.03(amind) − 8.25(mexamer) + 56.72(white), with African Americans as the reference, what is the predicted distance for <strong>whites</strong>? (Round to 2 decimal places)',
+answer:'297.69',checker:v=>{let n=parseFloat(v);return n>=297.6&&n<=297.7},
+ok:'For whites: amind=0, mexamer=0, white=1. Ŷ = 240.97 + 56.72 = <strong>297.69 miles</strong>.',
+no:'Substitute white=1, others=0: Ŷ = 240.97 + 157.03(0) − 8.25(0) + 56.72(1) = <strong>297.69</strong>.'},
+
+{id:14,type:'fill',cat:'Multi-Category',text:'Using the same model, what is the predicted distance for <strong>American Indians</strong>?',
+answer:'398',checker:v=>{let n=parseFloat(v);return n>=397.9&&n<=398.1},
+ok:'For American Indians: Ŷ = 240.97 + 157.03(1) = <strong>398.00 miles</strong>.',
+no:'Substitute amind=1, others=0: Ŷ = 240.97 + 157.03 = <strong>398.00</strong>.'},
+
+{id:15,type:'mc',cat:'Multi-Category',text:'In the same model, the coefficient for American Indians (157.03) has a p-value of 0.225 despite being large. The most likely explanation is:',
+opts:['The coefficient is biased','The reference category was poorly chosen','American Indians have a very small sample size (~25), producing a very large SE that overwhelms the coefficient','The model has multicollinearity'],
+ans:2,
+ok:'With n ≈ 25, SE = 129.49. t = 157.03/129.49 = 1.21 — far below the critical value. This is a power problem, not a bias problem.',
+no:'Small sample → large SE → small t-value. The estimate is still unbiased; we just lack the <strong>statistical power</strong> to distinguish it from zero.'},
+
+{id:16,type:'fill',cat:'Multi-Category',text:'From the same model, calculate the difference in predicted distance between <strong>whites and Mexican Americans</strong>: β̂_white − β̂_mexamer = ?',
+answer:'64.97',checker:v=>{let n=parseFloat(v);return n>=64.9&&n<=65.1},
+ok:'56.72 − (−8.25) = 56.72 + 8.25 = <strong>64.97 miles</strong>. Whites live about 65 miles farther than Mexican Americans.',
+no:'β̂₃ − β̂₂ = 56.72 − (−8.25) = 56.72 + 8.25 = <strong>64.97</strong>.'},
+
+{id:17,type:'mc',cat:'Multi-Category',text:'Is the white-vs-Mexican American difference (64.97 from the previous question) directly tested in the default regression output?',
+opts:['Yes — both coefficients are shown so the difference is automatically tested','No — this is a contrast between two included categories, which requires the test or lincom command','Yes — it equals the model F-test','Only if R² is above 0.05'],
+ans:1,
+ok:'The default output only tests each included group against the reference. Contrasts between included groups require additional post-estimation commands.',
+no:'Default output shows contrasts with the <strong>reference</strong> only. Included-category contrasts need <code>test</code> or <code>lincom</code>.'},
+
+// ─── TESTING CONTRASTS ───
+{id:18,type:'mc',cat:'Contrasts',text:'Which Stata command tests whether the coefficients for two included dummies are equal (e.g., H₀: β_amind = β_mexamer)?',
+opts:['regress amind=mexamer','correlate amind mexamer','test amind=mexamer','ttest amind=mexamer'],
+ans:2,
+ok:'The <code>test</code> command performs a partial F-test on the restriction that two coefficients are equal. Run it after <code>regress</code>.',
+no:'Use <code>test amind=mexamer</code> after the regression command. This tests H₀: β₁ = β₂.'},
+
+{id:19,type:'mc',cat:'Contrasts',text:'Which command provides the difference in coefficients, its standard error, t-value, p-value, AND confidence interval?',
+opts:['test amind=mexamer','lincom mexamer-amind','estat vce','predict'],
+ans:1,
+ok:'<code>lincom</code> computes the linear combination, its SE (using the VCE matrix), t-value, p-value, and CI — all from one model estimation. Gordon recommends it as the preferred approach.',
+no:'<code>lincom</code> is the most complete tool: difference, SE, t, p, and CI from a single estimation.'},
+
+{id:20,type:'mc',cat:'Contrasts',text:'The three approaches to testing contrasts among included categories all produce:',
+opts:['Different test statistics and p-values','The same test statistics and p-values (they are equivalent)','Results that cannot be compared','Different R² values'],
+ans:1,
+ok:'Re-estimation, <code>test</code>, and <code>lincom</code> yield equivalent results. For 1-df tests: F = t². P-values are identical.',
+no:'All three approaches are <strong>equivalent</strong>. F = t² for 1-df tests, and p-values match exactly.'},
+
+{id:21,type:'fill',cat:'Contrasts',text:'If <code>test amind=mexamer</code> gives F(1, 5397) = 1.46, what is the corresponding |t|-value? (Round to 2 decimal places)',
+answer:'1.21',checker:v=>{let n=parseFloat(v);return n>=1.20&&n<=1.22},
+ok:'|t| = √F = √1.46 = <strong>1.21</strong>. This F = t² equivalence holds for any test with 1 numerator df.',
+no:'For 1 numerator df: |t| = √F = √1.46 = <strong>1.21</strong>.'},
+
+// ─── VCE MATRIX ───
+{id:22,type:'fill',cat:'VCE Matrix',text:'Given Var(β̂₁) = 16,766.64, Var(β̂₂) = 2,968.48, Cov(β̂₁, β̂₂) = 522.00, calculate SE(β̂₁ − β̂₂). (Round to 2 decimal places)',
+answer:'136.72',checker:v=>{let n=parseFloat(v);return n>=136.5&&n<=137.0},
+ok:'√(16766.64 + 2968.48 − 2×522.00) = √(18691.12) = <strong>136.72</strong>.',
+no:'SE = √(Var₁ + Var₂ − 2·Cov) = √(16766.64 + 2968.48 − 1044.00) = √18691.12 = <strong>136.72</strong>.'},
+
+{id:23,type:'mc',cat:'VCE Matrix',text:'Why can\'t you simply add or subtract individual standard errors to get the SE of a difference between two coefficients?',
+opts:['Because SEs are always positive','Because the formula includes a covariance term: Var(β̂₁ − β̂₂) = Var(β̂₁) + Var(β̂₂) − 2·Cov(β̂₁, β̂₂)','Because standard errors are measured in different units','Because Stata doesn\'t allow it'],
+ans:1,
+ok:'The variance of a linear combination includes the covariance between the estimates. Ignoring it produces the wrong SE and thus the wrong t-value.',
+no:'The variance of a difference = Var₁ + Var₂ <strong>− 2·Cov</strong>. The covariance term captures the correlation between sampling distributions.'},
+
+{id:24,type:'mc',cat:'VCE Matrix',text:'In Stata, how do you display the variance-covariance matrix of the estimated regression coefficients?',
+opts:['correlate, after regress','estat vce, after regress','matrix list e(V)','display e(rss)'],
+ans:1,
+ok:'<code>estat vce</code> (a postestimation command) displays the VCE matrix. Diagonal elements = variances (squared SEs); off-diagonal = covariances.',
+no:'Use <code>estat vce</code> after <code>regress</code>. Diagonal = variances = SE². Off-diagonal = covariances.'},
+
+// ─── FACTOR VARIABLES ───
+{id:25,type:'mc',cat:'Stata/Factor Vars',text:'What does the Stata command <code>regress Y ib2.race</code> do?',
+opts:['Regresses Y on race squared','Creates dummy variables for race, uses category 2 as the reference, and regresses Y on the remaining dummies','Regresses Y on the second observation only','Recodes race into 2 categories'],
+ans:1,
+ok:'The <code>i</code> prefix = treat as categorical. <code>b2</code> = base (reference) category 2. Stata auto-creates virtual dummies.',
+no:'<code>ib2.</code> means "treat as <strong>i</strong>ndicator with <strong>b</strong>ase category <strong>2</strong>." Stata creates virtual dummies and excludes category 2.'},
+
+{id:26,type:'mc',cat:'Stata/Factor Vars',text:'If you use <code>i.M484</code> without first recoding missing values (97, 99) to system missing (<code>.</code>), what happens?',
+opts:['Stata ignores the missing codes automatically','Stata creates dummy variables for codes 97 and 99 as if they were real categories','Stata gives an error message','Nothing — factor variables handle missing data'],
+ans:1,
+ok:'Stata has no way to know 97 and 99 are missing codes. It creates dummies for them — "Refused" becomes a racial-ethnic category in your model.',
+no:'Stata creates dummies for <strong>every unique integer</strong>. Codes 97/99 become real categories unless you recode them to <code>.</code> first.'},
+
+{id:27,type:'mc',cat:'Stata/Factor Vars',text:'In factor variable output, what does <code>3.M484</code> refer to?',
+opts:['M484 multiplied by 3','The virtual dummy for category 3 of M484 — its coefficient relative to the reference','The 3rd observation in the dataset','The 3rd principal component'],
+ans:1,
+ok:'<code>#.varname</code> is Stata\'s notation for the virtual dummy representing category # of that variable.',
+no:'<code>3.M484</code> = the coefficient for the virtual dummy for category 3, measured against the reference.'},
+
+// ─── ADDITIVE MODEL ───
+{id:28,type:'mc',cat:'Additive Model',text:'In an additive model with both dummy and continuous predictors, "parallel regression lines" means:',
+opts:['All groups have the same mean on Y','The slope of each continuous variable is the same for all groups — only intercepts differ','The predictors are uncorrelated','The model has perfect fit'],
+ans:1,
+ok:'Parallel lines = same slopes, different intercepts. The vertical gap between lines = the dummy coefficient. This is the defining feature of the additive model.',
+no:'Parallel = <strong>same slopes, different intercepts</strong>. The effect of the continuous variable is identical across groups.'},
+
+{id:29,type:'mc',cat:'Additive Model',text:'When you add continuous control variables to a dummy-only model, what must your interpretation of the dummy coefficients include?',
+opts:['The R² value','The phrase "holding [specific control variables] constant"','The sample mean','The standard deviation of each variable'],
+ans:1,
+ok:'In multiple regression, every coefficient must include the "holding constant" clause specifying which variables are controlled.',
+no:'With controls, dummy coefficients become <strong>partial</strong> effects: "...holding [specific variables] constant."'},
+
+{id:30,type:'mc',cat:'Additive Model',text:'The coefficient for <em>female</em> changes from −59.39 (bivariate) to −33.79 (with controls). This happened because:',
+opts:['The bivariate model was wrong and should be discarded','Part of the bivariate gender difference was confounded by variables correlated with gender — controlling for them reveals the partial effect','Adding variables always reduces coefficients','The sample size changed'],
+ans:1,
+ok:'This is a preview of omitted variable bias (Ch. 10). The bivariate coefficient included both the direct gender association and indirect effects through confounders.',
+no:'The bivariate coefficient captured both the "true" partial gender effect and effects of omitted confounders. Controls remove confounding.'},
+
+{id:31,type:'written',cat:'Additive Model',text:'The full model intercept is −293.51. Explain what this number represents and whether it is meaningful.',
+sample:'The intercept is the predicted distance when ALL variables equal zero: a zero-year-old African American male with no earnings, no siblings, and a mother with zero schooling who is also age zero. This value is not substantively meaningful because zero is implausible for age variables, but it is mathematically necessary for computing predictions at realistic values.'},
+
+// ─── OUTPUT INTERPRETATION ───
+{id:32,type:'mc',cat:'Output Reading',text:'In Display 7.6, the model F-test shows F(3, 5397) = 2.42 with Prob > F = 0.0643. At α = .05:',
+opts:['The model is statistically significant','The model is not statistically significant — we fail to reject H₀ that all race dummy coefficients equal zero','All race categories differ significantly from each other','The model explains more than 50% of variation'],
+ans:1,
+ok:'Prob > F = 0.0643 > 0.05, so we fail to reject H₀. The race dummies collectively do not significantly predict distance (at α = .05).',
+no:'p = 0.0643 > 0.05 → fail to reject H₀. The set of race dummies does <strong>not</strong> significantly improve prediction at the 5% level.'},
+
+{id:33,type:'mc',cat:'Output Reading',text:'Display 7.6 shows R² = 0.0013. This means:',
+opts:['The model is terrible and should be discarded','Race explains about 0.13% of the total variation in distance from mother — low R² is common in social science but doesn\'t invalidate the model','The model has 0.13 predictors','R² is not reported for dummy variable models'],
+ans:1,
+ok:'R² = 0.0013 means 0.13% of variation is explained. Low R² is common when modeling human behavior — individual coefficients can still be important.',
+no:'R² = 0.0013 = 0.13% of variation explained. Low values are common and do <strong>not</strong> mean the model is worthless.'},
+
+// ─── CODING IN STATA ───
+{id:34,type:'mc',cat:'Stata Coding',text:'Which Stata command creates a dummy variable <em>aframer</em> that equals 1 for African Americans (M484 = 1) and handles missing data (codes 97, 99)?',
+opts:['generate aframer = M484','generate aframer = (M484==1) if M484<97','generate aframer = 1','recode M484 (1=1), gen(aframer)'],
+ans:1,
+ok:'The true/false evaluation <code>(M484==1)</code> produces 1 when true, 0 when false. The <code>if M484<97</code> qualifier sets aframer to missing for cases with codes ≥ 97.',
+no:'<code>generate aframer=(M484==1) if M484<97</code>: the expression evaluates to 1 or 0, and the <code>if</code> qualifier excludes missing codes.'},
+
+{id:35,type:'mc',cat:'Stata Coding',text:'After creating dummy variables, Gordon strongly recommends:',
+opts:['Running the regression immediately','Cross-tabulating the original variable with each new dummy to verify correct coding','Deleting the original variable','Standardizing the dummies'],
+ans:1,
+ok:'<code>tabulate M484 aframer, missing</code> verifies that 1s, 0s, and missing values are where you expect. This verification step catches coding errors early.',
+no:'Always verify with <code>tabulate original_var new_dummy, missing</code>. Gordon says "we cannot overemphasize the importance of checking your code."'},
+
+// ─── MATCHING ───
+{id:36,type:'match',cat:'Key Terms',text:'Match each term with its definition:',
+left:['Reference category','Dummy variable','c − 1 rule','Linear combination','Variance-covariance matrix'],
+right:['The excluded group; baseline for all comparisons','A 0/1 indicator for one category','Number of dummies to include in the model','Expression formed by adding/subtracting coefficients (e.g., β₁ − β₂)','Contains variances (diagonal) and covariances (off-diagonal) of estimated coefficients'],
+pairs:[[0,0],[1,1],[2,2],[3,3],[4,4]]},
+
+{id:37,type:'match',cat:'Stata Commands',text:'Match each Stata command with what it does:',
+left:['test amind=mexamer','lincom white-amind','estat vce','regress Y ib1.M484'],
+right:['Tests H₀: β_amind = β_mexamer via partial F-test','Computes difference, SE, t, p, and CI for β_white − β_amind','Displays the variance-covariance matrix of estimated coefficients','Regresses Y on race dummies with category 1 as reference'],
+pairs:[[0,0],[1,1],[2,2],[3,3]]},
+
+// ─── SCENARIO ───
+{id:38,type:'mc',cat:'Scenario',text:'<strong>Scenario:</strong> You regress hourly wages on dummies for education (HS diploma, Some College, Bachelor\'s, Graduate degree) with "Less than HS" as the reference. The Bachelor\'s coefficient is $12.50 and the Graduate coefficient is $18.00. A colleague asks: "Do Bachelor\'s and Graduate degree holders earn significantly different wages?" How do you answer?',
+opts:['Yes — both coefficients are large and positive','You cannot tell from the default output — the test for Bachelor\'s vs. Graduate requires lincom bachelor-graduate or test bachelor=graduate','Subtract the coefficients: 18.00 − 12.50 = 5.50, which is obviously significant','Run a new regression with only Bachelor\'s and Graduate holders'],
+ans:1,
+ok:'The default output tests each group against the reference (Less than HS). The Bachelor\'s-vs-Graduate contrast is between two included categories and requires a post-estimation command.',
+no:'Both groups are <strong>included</strong> categories compared to the reference. Their contrast requires <code>lincom</code> or <code>test</code>.'},
+
+{id:39,type:'mc',cat:'Scenario',text:'<strong>Scenario:</strong> You run <code>regress income i.region</code> and Stata drops one category (region = 1). Your collaborator says "Stata dropped the Northeast — it must not matter for income." Is this correct?',
+opts:['Yes — Stata only drops unimportant variables','No — Stata excluded it as the reference category (the lowest numeric value). The Northeast is the baseline for comparison, not irrelevant.','Stata dropped it due to missing data','Yes — the coefficient would have been zero'],
+ans:1,
+ok:'With <code>i.</code> syntax, Stata defaults to the lowest-coded category as the reference. It\'s excluded by design, not because it\'s unimportant.',
+no:'Stata uses the <strong>lowest numeric value</strong> as the default reference. The Northeast is the comparison baseline, not an irrelevant variable.'},
+
+{id:40,type:'mc',cat:'Scenario',text:'<strong>Scenario:</strong> A published table reports coefficients for family structure with "Two-parent" as the reference and uses superscript letters to indicate contrasts. Superscript "a" on "Cohabiting stepfamily" means the Cohabiting coefficient differs significantly from another included category. What does this practice tell you?',
+opts:['The authors used additional tests beyond the default output','The coefficients are biased','The reference category is wrong','Standard errors were not computed'],
+ans:0,
+ok:'Superscript letters indicating contrasts among included categories show the authors used test, lincom, or re-estimation beyond the default output — a mark of careful analysis (see Literature Excerpt 7.2).',
+no:'Superscripts for included-category contrasts mean the authors ran <strong>additional tests</strong> (test/lincom/re-estimation) beyond what the default output provides.'},
+
+// ─── INTERPRETATION ───
+{id:41,type:'written',cat:'Interpretation',text:'Using this output (from a model with African Americans as reference, controlling for gender and continuous covariates), interpret the coefficient for <em>white</em> = 35.07:<br><br><code>white | 35.06974 &nbsp; 25.22134 &nbsp; 1.39 &nbsp; 0.164</code>',
+sample:'Controlling for gender, earnings, age, number of brothers and sisters, mother\'s years of schooling, and mother\'s age, white adults are predicted to live approximately 35 miles farther from their mothers than African American adults, on average. However, this difference is not statistically significant at the .05 level (t = 1.39, p = .164).'},
+
+{id:42,type:'fill',cat:'Interpretation',text:'In a model with only dummy predictors (no continuous controls), the intercept equals the __________ for the reference category.',
+answer:'mean',checker:v=>{let w=v.trim().toLowerCase();return w.includes('mean')||w.includes('average')},
+ok:'The intercept = the <strong>mean</strong> of Y for the reference category. This is because E(Y|all dummies = 0) = β₀.',
+no:'When all dummies = 0, E(Y) = β₀ = the <strong>mean</strong> of the outcome for the reference group.'},
+
+{id:43,type:'mc',cat:'Interpretation',text:'In the full model (Display 7.13), after controlling for gender and continuous covariates, none of the race-ethnicity dummies are individually significant at α = .05. Does this mean race doesn\'t matter?',
+opts:['Yes — nonsignificant means no effect','Not necessarily — the individual t-tests have low power (especially for small groups), and the overall F-test for the set of race dummies should also be examined','Yes — if coefficients aren\'t significant, drop the variables','It means the model is misspecified'],
+ans:1,
+ok:'Individual nonsignificance may reflect low power rather than no effect. The joint F-test for the set of race dummies provides a more comprehensive assessment.',
+no:'Individual nonsignificance ≠ "no effect." Use <code>test amind mexamer white</code> for the <strong>joint F-test</strong> of all race dummies simultaneously.'},
+
+{id:44,type:'mc',cat:'Concepts',text:'Standardized (beta) coefficients are NOT meaningful for dummy variables because:',
+opts:['Dummies always have small coefficients','A one-standard-deviation increase in a 0/1 variable has no interpretable meaning — you cannot be "0.5 female"','Standardization requires normally distributed variables','Dummies cannot be included in multiple regression'],
+ans:1,
+ok:'A dummy moves from 0 to 1. Multiplying by the SD (e.g., 0.48) creates an uninterpretable "0.48 of a unit" shift. Use the semistandardized coefficient (β̂/σ_Y) instead.',
+no:'A one-SD increase on a 0/1 variable is meaningless. The <strong>semistandardized coefficient</strong> (β̂/σ_Y) is the appropriate alternative.'},
+
+{id:45,type:'mc',cat:'Additive Model',text:'The additive model assumes the effect of gender on distance is the same across all racial-ethnic groups. What would you need to relax this assumption?',
+opts:['More control variables','Interaction terms (e.g., female × white) as covered in Chapter 8','A larger sample','A different reference category'],
+ans:1,
+ok:'Interaction terms allow the slope of one variable to differ across levels of another. Without them, the model forces parallel lines (equal effects across groups).',
+no:'<strong>Interaction terms</strong> (Ch. 8) allow slopes to vary by group, breaking the parallel-lines assumption.'},
+
+// ─── TRICK / DEEP ───
+{id:46,type:'mc',cat:'Deep Understanding',text:'<strong>Tricky:</strong> You add an irrelevant dummy variable to your model. What happens to R²?',
+opts:['R² decreases','R² increases or stays the same — it can never decrease when adding predictors','R² is unaffected by dummy variables','R² becomes negative'],
+ans:1,
+ok:'R² can never decrease when adding predictors (OLS can always set a useless coefficient to ≈ 0). Adjusted R², however, CAN decrease if the variable doesn\'t improve fit enough to offset the lost df.',
+no:'R² <strong>never decreases</strong> when adding a predictor. Adjusted R² can decrease for irrelevant predictors.'},
+
+{id:47,type:'mc',cat:'Deep Understanding',text:'<strong>Tricky:</strong> Two researchers analyze the same data. Researcher A uses African Americans as the reference; Researcher B uses Whites. They compare their R² values. What do they find?',
+opts:['Researcher A has higher R² because the reference group has a smaller sample','Researcher B has higher R² because whites are the largest group','They have identical R² values — the reference category doesn\'t affect model fit','R² cannot be compared across models'],
+ans:2,
+ok:'The reference category is a reparameterization. The model fit (R², SSE, F-test) is completely unchanged. Only the individual coefficients differ.',
+no:'R² is <strong>identical</strong> regardless of reference category. Changing the reference changes interpretation, not fit.'},
+];
+
+const TOTAL=Q.length;
+const CATS=[...new Set(Q.map(q=>q.cat))];
+const TYPE_LABELS={mc:'Multiple Choice',fill:'Fill in the Blank',written:'Written Response',match:'Matching'};
+const TYPE_BADGE={mc:'mc',fill:'fill',written:'written',match:'match'};
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render(){
+  const a=document.getElementById('app');
+  if(state.done){renderResults(a);return}
+  let answered=Object.keys(state.answers).length;
+  let correct=Object.values(state.scores).filter(v=>v).length;
+  let pct=Math.round((answered/TOTAL)*100);
+
+  let html=`<div class="exam-header"><h1>Dummy Variables — Chapter Exam</h1><p>Gordon Ch. 7 · Comprehensive Assessment</p>
+    <div class="exam-meta"><span class="meta-pill"><b>${TOTAL}</b> Questions</span><span class="meta-pill"><b>6</b> Question Types</span><span class="meta-pill">Progress <b>Saved</b></span></div></div>`;
+
+  html+=`<div class="progress-strip"><div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <span class="progress-text">${answered}/${TOTAL}</span>
+    <span class="score-text">${correct}✓</span></div></div>`;
+
+  html+=`<div class="q-nav">`;
+  for(let i=0;i<TOTAL;i++){
+    let cls='q-dot';
+    if(i===state.cur)cls+=' active';
+    else if(state.scores[i]===true)cls+=' correct';
+    else if(state.scores[i]===false)cls+=' wrong';
+    else if(state.answers[i]!==undefined)cls+=' answered';
+    html+=`<span class="${cls}" onclick="goQ(${i})">${i+1}</span>`;
+  }
+  html+=`</div>`;
+
+  for(let i=0;i<TOTAL;i++){
+    html+=renderQuestion(i);
+  }
+
+  html+=`<div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">`;
+  if(answered>=TOTAL){
+    html+=`<button class="btn btn-primary" style="font-size:15px;padding:14px 40px" onclick="finishExam()">📊 View Final Results</button>`;
+  } else {
+    html+=`<p style="color:var(--dim);font-size:13px">Answer all ${TOTAL} questions to unlock final results. ${TOTAL-answered} remaining.</p>`;
+  }
+  html+=`</div>`;
+  html+=`<div class="reset-area"><button class="reset-btn" onclick="reset()">↻ Reset Exam</button></div>`;
+
+  a.innerHTML=html;
+  // Restore match states
+  Q.forEach((q,i)=>{if(q.type==='match'&&state.answers[i])restoreMatch(i)});
+}
+
+function renderQuestion(i){
+  let q=Q[i];
+  let vis=i===state.cur?'active':'';
+  let badge=TYPE_BADGE[q.type]||'mc';
+  let label=TYPE_LABELS[q.type]||q.type;
+  if(q.cat==='Stata Coding'||q.cat==='Stata/Factor Vars'||q.cat==='Stata Commands')badge='stata';
+  if(q.cat==='Scenario')badge='scenario';
+  if(q.cat==='Output Reading')badge='output';
+  let locked=state.answers[i]!==undefined;
+
+  let h=`<div class="q-card ${vis}" id="qc_${i}">`;
+  h+=`<div class="q-top"><span class="q-badge ${badge}">${label}</span><span class="q-counter">${q.cat} · Q${i+1}/${TOTAL}</span></div>`;
+  h+=`<div class="q-text">${q.text}</div>`;
+
+  if(q.type==='mc'){
+    h+=`<div id="opts_${i}">`;
+    let letters='ABCDEFGH';
+    q.opts.forEach((o,j)=>{
+      let cls='opt-btn';
+      if(locked){
+        cls+=' locked';
+        if(j===q.ans)cls+=' correct-show';
+        else if(j===state.answers[i]&&j!==q.ans)cls+=' wrong-show';
+      }
+      h+=`<button class="${cls}" onclick="answerMC(${i},${j})"><span class="opt-letter">${letters[j]}</span>${o}</button>`;
+    });
+    h+=`</div>`;
+    h+=renderFB(i);
+  }
+  else if(q.type==='fill'){
+    let v=state.answers[i]!==undefined?state.answers[i]:'';
+    let cls='fill-input';
+    if(locked)cls+=state.scores[i]?' ok':' bad';
+    h+=`<input type="text" class="${cls}" id="inp_${i}" value="${escH(v)}" placeholder="Type your answer..." ${locked?'readonly':''} onkeydown="if(event.key==='Enter')answerFill(${i})">`;
+    if(!locked)h+=`<button class="btn btn-check btn-sm" onclick="answerFill(${i})">Check</button>`;
+    h+=renderFB(i);
+  }
+  else if(q.type==='written'){
+    let v=state.answers[i]!==undefined?state.answers[i]:'';
+    h+=`<textarea class="fill-input" id="inp_${i}" placeholder="Write your interpretation..." ${locked?'readonly':''}>${escH(v)}</textarea>`;
+    if(!locked)h+=`<button class="btn btn-check btn-sm" onclick="answerWritten(${i})">Show Model Answer</button>`;
+    h+=renderFB(i);
+  }
+  else if(q.type==='match'){
+    h+=`<div class="match-zone" id="mz_${i}">`;
+    h+=`<div>`;q.left.forEach((l,j)=>{h+=`<div class="match-item match-left" id="ml_${i}_${j}" onclick="matchClick(${i},'l',${j})">${l}</div>`});h+=`</div>`;
+    h+=`<div>`;let ri=[...Array(q.right.length).keys()];if(!locked)ri=shuffle(ri,i);
+    ri.forEach(j=>{h+=`<div class="match-item match-right" id="mr_${i}_${j}" onclick="matchClick(${i},'r',${j})">${q.right[j]}</div>`});h+=`</div>`;
+    h+=`</div>`;
+    h+=renderFB(i);
+  }
+
+  h+=`<div class="q-actions">`;
+  h+=i>0?`<button class="btn btn-ghost btn-sm" onclick="goQ(${i-1})">← Prev</button>`:`<span></span>`;
+  h+=i<TOTAL-1?`<button class="btn btn-primary btn-sm" onclick="goQ(${i+1})">Next →</button>`:`<span></span>`;
+  h+=`</div></div>`;
+  return h;
+}
+
+function renderFB(i){
+  let q=Q[i];
+  if(state.answers[i]===undefined)return `<div class="fb-box" id="fb_${i}"></div>`;
+  let isOk=state.scores[i];
+  if(q.type==='written'){
+    return `<div class="fb-box fb-sample show" id="fb_${i}"><b>📝 Model Answer:</b>${q.sample}<br><br><em style="color:var(--dim)">Compare your response. Key elements: direction, magnitude, reference category, "on average," and "holding constant" if controls are present.</em></div>`;
+  }
+  if(q.type==='match'){
+    let allOk=state.scores[i];
+    return `<div class="fb-box ${allOk?'fb-ok':'fb-no'} show" id="fb_${i}"><b>${allOk?'✓ All matched correctly!':'✗ Some matches were incorrect.'}</b>${allOk?'Well done — you know these key terms.':'Review the correct pairings shown above (highlighted in green).'}</div>`;
+  }
+  let cls=isOk?'fb-ok':'fb-no';
+  let msg=isOk?q.ok:q.no;
+  return `<div class="fb-box ${cls} show" id="fb_${i}"><b>${isOk?'✓ Correct!':'✗ Not quite.'}</b>${msg}</div>`;
+}
+
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function shuffle(arr,seed){let a=[...arr];for(let i=a.length-1;i>0;i--){let j=(seed*31+i*17)%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// ═══════════════════════════════════════
+// ANSWERS
+// ═══════════════════════════════════════
+function goQ(i){state.cur=i;save();render();window.scrollTo({top:document.getElementById('qc_'+i)?.offsetTop-120||0,behavior:'smooth'})}
+
+function answerMC(i,j){
+  if(state.answers[i]!==undefined)return;
+  state.answers[i]=j;state.scores[i]=(j===Q[i].ans);state.cur=i;save();render();
+  scrollToFB(i);
+}
+function answerFill(i){
+  let inp=document.getElementById('inp_'+i);if(!inp)return;
+  let v=inp.value.trim();if(!v)return;
+  state.answers[i]=v;state.scores[i]=Q[i].checker(v);state.cur=i;save();render();
+  scrollToFB(i);
+}
+function answerWritten(i){
+  let inp=document.getElementById('inp_'+i);if(!inp)return;
+  let v=inp.value.trim();if(!v){inp.style.borderColor='var(--error)';return}
+  state.answers[i]=v;state.scores[i]=true;state.cur=i;save();render();
+  scrollToFB(i);
+}
+
+// Matching logic
+let matchState={};
+function matchClick(qi,side,idx){
+  if(state.answers[qi]!==undefined)return;
+  if(!matchState[qi])matchState[qi]={sel:null,matched:[]};
+  let ms=matchState[qi];
+  let key=side+'_'+idx;
+  if(ms.sel===null){
+    ms.sel={side,idx};
+    document.getElementById('m'+side[0]+'_'+qi+'_'+idx).classList.add('m-selected');
+  } else if(ms.sel.side===side){
+    document.getElementById('m'+ms.sel.side[0]+'_'+qi+'_'+ms.sel.idx).classList.remove('m-selected');
+    ms.sel={side,idx};
+    document.getElementById('m'+side[0]+'_'+qi+'_'+idx).classList.add('m-selected');
+  } else {
+    let l=ms.sel.side==='l'?ms.sel.idx:idx;
+    let r=ms.sel.side==='r'?ms.sel.idx:idx;
+    let correct=Q[qi].pairs.some(p=>p[0]===l&&p[1]===r);
+    let le=document.getElementById('ml_'+qi+'_'+l);
+    let re=document.getElementById('mr_'+qi+'_'+r);
+    document.getElementById('m'+ms.sel.side[0]+'_'+qi+'_'+ms.sel.idx).classList.remove('m-selected');
+    if(correct){
+      le.classList.add('m-matched');re.classList.add('m-matched');
+      ms.matched.push([l,r]);
+    } else {
+      le.classList.add('m-wrong');re.classList.add('m-wrong');
+      setTimeout(()=>{le.classList.remove('m-wrong');re.classList.remove('m-wrong')},800);
+    }
+    ms.sel=null;
+    if(ms.matched.length===Q[qi].pairs.length){
+      state.answers[qi]='matched';state.scores[qi]=true;save();
+      setTimeout(()=>render(),300);
+    } else if(ms.matched.length + countWrong(qi) >= Q[qi].pairs.length){
+      // Mark remaining as matched for completion
+      Q[qi].pairs.forEach(p=>{
+        if(!ms.matched.some(m=>m[0]===p[0]&&m[1]===p[1])){
+          ms.matched.push(p);
+          let le2=document.getElementById('ml_'+qi+'_'+p[0]);
+          let re2=document.getElementById('mr_'+qi+'_'+p[1]);
+          if(le2)le2.classList.add('m-matched');if(re2)re2.classList.add('m-matched');
+        }
+      });
+      state.answers[qi]='matched';state.scores[qi]=(ms.matched.length===Q[qi].pairs.length);save();
+      setTimeout(()=>render(),300);
+    }
+  }
+}
+function countWrong(qi){return 0}
+function restoreMatch(qi){
+  if(!Q[qi].pairs)return;
+  Q[qi].pairs.forEach(p=>{
+    let le=document.getElementById('ml_'+qi+'_'+p[0]);
+    let re=document.getElementById('mr_'+qi+'_'+p[1]);
+    if(le)le.classList.add('m-matched');if(re)re.classList.add('m-matched');
+  });
+}
+
+function scrollToFB(i){setTimeout(()=>{let el=document.getElementById('fb_'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},100)}
+
+// ═══════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════
+function finishExam(){state.done=true;save();render();window.scrollTo({top:0})}
+
+function renderResults(a){
+  let correct=Object.values(state.scores).filter(v=>v).length;
+  let pct=Math.round((correct/TOTAL)*100);
+  let grade=pct>=90?'A':pct>=80?'B':pct>=70?'C':pct>=60?'D':'F';
+  let gradeColor=pct>=80?'good':pct>=65?'mid':'low';
+
+  // Category breakdown
+  let catStats={};
+  Q.forEach((q,i)=>{
+    if(!catStats[q.cat])catStats[q.cat]={total:0,correct:0};
+    catStats[q.cat].total++;
+    if(state.scores[i])catStats[q.cat].correct++;
+  });
+
+  // Type breakdown
+  let typeStats={};
+  Q.forEach((q,i)=>{
+    let t=TYPE_LABELS[q.type]||q.type;
+    if(!typeStats[t])typeStats[t]={total:0,correct:0};
+    typeStats[t].total++;
+    if(state.scores[i])typeStats[t].correct++;
+  });
+
+  // Struggles
+  let struggles=[];
+  Object.entries(catStats).forEach(([cat,s])=>{
+    let cpct=Math.round((s.correct/s.total)*100);
+    if(cpct<70)struggles.push({cat,cpct,correct:s.correct,total:s.total});
+  });
+  struggles.sort((a,b)=>a.cpct-b.cpct);
+
+  let h=`<div class="results-screen show">`;
+  h+=`<div style="font-size:14px;color:var(--dim);text-transform:uppercase;letter-spacing:2px">Final Results</div>`;
+  h+=`<div class="results-score">${correct} / ${TOTAL}</div>`;
+  h+=`<div class="results-pct">${pct}% · Grade: ${grade}</div>`;
+
+  h+=`<div class="results-grid">`;
+  h+=`<div class="results-card"><div class="rc-label">Total Correct</div><div class="rc-val ${gradeColor}">${correct}</div></div>`;
+  h+=`<div class="results-card"><div class="rc-label">Total Questions</div><div class="rc-val">${TOTAL}</div></div>`;
+  h+=`<div class="results-card"><div class="rc-label">Accuracy</div><div class="rc-val ${gradeColor}">${pct}%</div></div>`;
+  h+=`<div class="results-card"><div class="rc-label">Grade</div><div class="rc-val ${gradeColor}">${grade}</div></div>`;
+  h+=`</div>`;
+
+  h+=`<div style="text-align:left;margin:24px 0"><h3 style="font-family:var(--serif);font-size:18px;color:var(--bright);margin-bottom:16px">Breakdown by Topic</h3>`;
+  h+=`<table class="dt"><thead><tr><th>Topic</th><th>Correct</th><th>Total</th><th>%</th></tr></thead><tbody>`;
+  Object.entries(catStats).forEach(([cat,s])=>{
+    let cpct=Math.round((s.correct/s.total)*100);
+    let cl=cpct>=80?'color:var(--success)':cpct>=60?'color:var(--warn)':'color:var(--error)';
+    h+=`<tr><td>${cat}</td><td>${s.correct}</td><td>${s.total}</td><td style="${cl};font-weight:600">${cpct}%</td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+
+  h+=`<div style="text-align:left;margin:24px 0"><h3 style="font-family:var(--serif);font-size:18px;color:var(--bright);margin-bottom:16px">Breakdown by Question Type</h3>`;
+  h+=`<table class="dt"><thead><tr><th>Type</th><th>Correct</th><th>Total</th><th>%</th></tr></thead><tbody>`;
+  Object.entries(typeStats).forEach(([t,s])=>{
+    let cpct=Math.round((s.correct/s.total)*100);
+    let cl=cpct>=80?'color:var(--success)':cpct>=60?'color:var(--warn)':'color:var(--error)';
+    h+=`<tr><td>${t}</td><td>${s.correct}</td><td>${s.total}</td><td style="${cl};font-weight:600">${cpct}%</td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+
+  if(struggles.length>0){
+    h+=`<div class="struggle-list"><h3>⚠ Areas to Review</h3>`;
+    struggles.forEach(s=>{h+=`<div class="struggle-item"><strong>${s.cat}</strong> — ${s.correct}/${s.total} correct (${s.cpct}%)</div>`});
+    h+=`</div>`;
+  }
+
+  h+=`<div style="margin-top:32px"><button class="btn btn-ghost" onclick="state.done=false;state.cur=0;save();render()">← Review Questions</button></div>`;
+  h+=`<div class="reset-area"><button class="reset-btn" onclick="reset()">↻ Reset Exam</button></div>`;
+  h+=`</div>`;
+  a.innerHTML=h;
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+load();render();
+</script>
+</body>
+</html>
